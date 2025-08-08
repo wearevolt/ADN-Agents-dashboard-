@@ -1,0 +1,44 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Зеленое тело -->
+  <circle cx="32" cy="40" r="18" fill="#8BC34A"/>
+  
+  <!-- Голова -->
+  <circle cx="32" cy="22" r="12" fill="#8BC34A"/>
+  
+  <!-- Очки -->
+  <circle cx="28" cy="20" r="4" fill="#4A4A4A" opacity="0.8"/>
+  <circle cx="36" cy="20" r="4" fill="#4A4A4A" opacity="0.8"/>
+  <rect x="31" y="19" width="2" height="2" fill="#4A4A4A"/>
+  
+  <!-- Цветы на голове -->
+  <circle cx="26" cy="12" r="3" fill="#FF5722"/>
+  <circle cx="32" cy="10" r="3" fill="#2196F3"/>
+  <circle cx="38" cy="12" r="3" fill="#FF9800"/>
+  <circle cx="42" cy="16" r="3" fill="#9C27B0"/>
+  
+  <!-- Центры цветов -->
+  <circle cx="26" cy="12" r="1" fill="#FFD700"/>
+  <circle cx="32" cy="10" r="1" fill="#FFD700"/>
+  <circle cx="38" cy="12" r="1" fill="#FFD700"/>
+  <circle cx="42" cy="16" r="1" fill="#FFD700"/>
+  
+  <!-- Лицо -->
+  <circle cx="29" cy="24" r="1" fill="#FF4081"/>
+  <circle cx="35" cy="24" r="1" fill="#FF4081"/>
+  <path d="M 28 26 Q 32 28 36 26" stroke="#4A4A4A" stroke-width="1" fill="none"/>
+  
+  <!-- Лупа -->
+  <circle cx="50" cy="18" r="6" fill="none" stroke="#FFD700" stroke-width="2"/>
+  <circle cx="50" cy="18" r="4" fill="rgba(255,255,255,0.3)"/>
+  <line x1="45" y1="23" x2="41" y2="27" stroke="#8B4513" stroke-width="2"/>
+  
+  <!-- Рука держащая лупу -->
+  <circle cx="44" cy="30" r="3" fill="#8BC34A"/>
+  
+  <!-- Юбка -->
+  <path d="M 20 50 Q 32 58 44 50 L 44 55 Q 32 62 20 55 Z" fill="#66BB6A"/>
+  
+  <!-- Ножки -->
+  <ellipse cx="26" cy="58" rx="3" ry="2" fill="#4A4A4A"/>
+  <ellipse cx="38" cy="58" rx="3" ry="2" fill="#4A4A4A"/>
+</svg> 
