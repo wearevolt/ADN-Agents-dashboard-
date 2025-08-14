@@ -66,9 +66,10 @@ const Endpoint = () => {
   }, [selectedEndpoint])
 
   useEffect(() => {
-    // Устанавливаем Agno API URL по умолчанию, если endpoint пустой
+    // Set default Agno API URL from env if endpoint is empty
+    const defaultUrl = (process.env.NEXT_PUBLIC_AGNO_API_URL || 'http://localhost:7777').replace(/\/$/, '')
     if (!selectedEndpoint || selectedEndpoint === 'http://localhost:7777' || selectedEndpoint.includes('api.agno.ai')) {
-      setSelectedEndpoint('http://localhost:7777')
+      setSelectedEndpoint(defaultUrl)
     }
   }, [])
 
@@ -167,9 +168,8 @@ const Endpoint = () => {
                 >
                   <p className="text-xs font-medium text-gray-800">
                     {isMounted
-                      ? truncateText(selectedEndpoint, 21) ||
-                        ENDPOINT_PLACEHOLDER
-                      : 'http://localhost:7777'}
+                      ? truncateText(selectedEndpoint, 21) || ENDPOINT_PLACEHOLDER
+                      : (process.env.NEXT_PUBLIC_AGNO_API_URL || 'http://localhost:7777')}
                   </p>
                   <div
                     className={`size-2 shrink-0 rounded-full ${getStatusColor(isEndpointActive)}`}
