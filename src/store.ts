@@ -28,7 +28,7 @@ interface PlaygroundStore {
     endpoints: {
       endpoint: string;
       id_playground_endpoint: string;
-    }[]
+    }[],
   ) => void;
   isStreaming: boolean;
   setIsStreaming: (isStreaming: boolean) => void;
@@ -40,7 +40,7 @@ interface PlaygroundStore {
   setMessages: (
     messages:
       | PlaygroundChatMessage[]
-      | ((prevMessages: PlaygroundChatMessage[]) => PlaygroundChatMessage[])
+      | ((prevMessages: PlaygroundChatMessage[]) => PlaygroundChatMessage[]),
   ) => void;
   hasStorage: boolean;
   setHasStorage: (hasStorage: boolean) => void;
@@ -55,7 +55,7 @@ interface PlaygroundStore {
   setSessionsData: (
     sessionsData:
       | SessionEntry[]
-      | ((prevSessions: SessionEntry[] | null) => SessionEntry[] | null)
+      | ((prevSessions: SessionEntry[] | null) => SessionEntry[] | null),
   ) => void;
   isSessionsLoading: boolean;
   setIsSessionsLoading: (isSessionsLoading: boolean) => void;
@@ -120,6 +120,6 @@ export const usePlaygroundStore = create<PlaygroundStore>()(
       onRehydrateStorage: () => (state) => {
         state?.setHydrated?.();
       },
-    }
-  )
+    },
+  ),
 );

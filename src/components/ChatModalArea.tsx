@@ -1,7 +1,7 @@
-'use client'
+"use client";
 
-import Sidebar from '@/components/playground/Sidebar'
-import { ChatArea } from '@/components/playground/ChatArea'
+import Sidebar from "@/components/playground/Sidebar";
+import { ChatArea } from "@/components/playground/ChatArea";
 
 export default function ChatModalArea() {
   return (
@@ -9,5 +9,5 @@ export default function ChatModalArea() {
       <Sidebar initialCollapsed={false} />
       <ChatArea />
     </div>
-  )
-} 
+  );
+}

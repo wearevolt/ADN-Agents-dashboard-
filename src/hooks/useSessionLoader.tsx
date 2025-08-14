@@ -1,85 +1,87 @@
-import { useCallback } from 'react'
+import { useCallback } from "react";
 import {
   getPlaygroundSessionAPI,
-  getAllPlaygroundSessionsAPI
-} from '@/api/playground'
-import { usePlaygroundStore } from '../store'
-import { toast } from 'sonner'
+  getAllPlaygroundSessionsAPI,
+} from "@/api/playground";
+import { usePlaygroundStore } from "../store";
+import { toast } from "sonner";
 import {
   PlaygroundChatMessage,
   ToolCall,
   ReasoningMessage,
-  ChatEntry
-} from '@/types/playground'
-import { getJsonMarkdown } from '@/lib/utils'
+  ChatEntry,
+} from "@/types/playground";
+import { getJsonMarkdown } from "@/lib/utils";
 
 interface SessionResponse {
-  session_id: string
-  agent_id: string
-  user_id: string | null
-  runs?: ChatEntry[]
+  session_id: string;
+  agent_id: string;
+  user_id: string | null;
+  runs?: ChatEntry[];
   memory: {
-    runs?: ChatEntry[]
-    chats?: ChatEntry[]
-  }
-  agent_data: Record<string, unknown>
+    runs?: ChatEntry[];
+    chats?: ChatEntry[];
+  };
+  agent_data: Record<string, unknown>;
 }
 
 const useSessionLoader = () => {
-  const setMessages = usePlaygroundStore((state) => state.setMessages)
-  const selectedEndpoint = usePlaygroundStore((state) => state.selectedEndpoint)
+  const setMessages = usePlaygroundStore((state) => state.setMessages);
+  const selectedEndpoint = usePlaygroundStore(
+    (state) => state.selectedEndpoint,
+  );
   const setIsSessionsLoading = usePlaygroundStore(
-    (state) => state.setIsSessionsLoading
-  )
-  const setSessionsData = usePlaygroundStore((state) => state.setSessionsData)
+    (state) => state.setIsSessionsLoading,
+  );
+  const setSessionsData = usePlaygroundStore((state) => state.setSessionsData);
 
   const getSessions = useCallback(
     async (agentId: string) => {
-      if (!agentId || !selectedEndpoint) return
+      if (!agentId || !selectedEndpoint) return;
       try {
-        setIsSessionsLoading(true)
+        setIsSessionsLoading(true);
         const sessions = await getAllPlaygroundSessionsAPI(
           selectedEndpoint,
-          agentId
-        )
-        setSessionsData(sessions)
+          agentId,
+        );
+        setSessionsData(sessions);
       } catch {
-        toast.error('Error loading sessions')
+        toast.error("Error loading sessions");
       } finally {
-        setIsSessionsLoading(false)
+        setIsSessionsLoading(false);
       }
     },
-    [selectedEndpoint, setSessionsData, setIsSessionsLoading]
-  )
+    [selectedEndpoint, setSessionsData, setIsSessionsLoading],
+  );
 
   const getSession = useCallback(
     async (sessionId: string, agentId: string) => {
       if (!sessionId || !agentId || !selectedEndpoint) {
-        return null
+        return null;
       }
 
       try {
         const response = (await getPlaygroundSessionAPI(
           selectedEndpoint,
           agentId,
-          sessionId
-        )) as SessionResponse
+          sessionId,
+        )) as SessionResponse;
 
         if (response && response.memory) {
           const sessionHistory = response.runs
             ? response.runs
-            : response.memory.runs
+            : response.memory.runs;
 
           if (sessionHistory && Array.isArray(sessionHistory)) {
             const messagesForPlayground = sessionHistory.flatMap((run) => {
-              const filteredMessages: PlaygroundChatMessage[] = []
+              const filteredMessages: PlaygroundChatMessage[] = [];
 
               if (run.message) {
                 filteredMessages.push({
-                  role: 'user',
-                  content: run.message.content ?? '',
-                  created_at: run.message.created_at
-                })
+                  role: "user",
+                  content: run.message.content ?? "",
+                  created_at: run.message.created_at,
+                });
               }
 
               if (run.response) {
@@ -87,75 +89,75 @@ const useSessionLoader = () => {
                   ...(run.response.tools ?? []),
                   ...(run.response.extra_data?.reasoning_messages ?? []).reduce(
                     (acc: ToolCall[], msg: ReasoningMessage) => {
-                      if (msg.role === 'tool') {
+                      if (msg.role === "tool") {
                         acc.push({
                           role: msg.role,
                           content: msg.content,
-                          tool_call_id: msg.tool_call_id ?? '',
-                          tool_name: msg.tool_name ?? '',
+                          tool_call_id: msg.tool_call_id ?? "",
+                          tool_name: msg.tool_name ?? "",
                           tool_args: msg.tool_args ?? {},
                           tool_call_error: msg.tool_call_error ?? false,
                           metrics: msg.metrics ?? { time: 0 },
                           created_at:
-                            msg.created_at ?? Math.floor(Date.now() / 1000)
-                        })
+                            msg.created_at ?? Math.floor(Date.now() / 1000),
+                        });
                       }
-                      return acc
+                      return acc;
                     },
-                    []
-                  )
-                ]
+                    [],
+                  ),
+                ];
 
                 filteredMessages.push({
-                  role: 'agent',
-                  content: (run.response.content as string) ?? '',
+                  role: "agent",
+                  content: (run.response.content as string) ?? "",
                   tool_calls: toolCalls.length > 0 ? toolCalls : undefined,
                   extra_data: run.response.extra_data,
                   images: run.response.images,
                   videos: run.response.videos,
                   audio: run.response.audio,
                   response_audio: run.response.response_audio,
-                  created_at: run.response.created_at
-                })
+                  created_at: run.response.created_at,
+                });
               }
-              return filteredMessages
-            })
+              return filteredMessages;
+            });
 
             const processedMessages = messagesForPlayground.map(
               (message: PlaygroundChatMessage) => {
                 if (Array.isArray(message.content)) {
                   const textContent = message.content
-                    .filter((item: { type: string }) => item.type === 'text')
+                    .filter((item: { type: string }) => item.type === "text")
                     .map((item) => item.text)
-                    .join(' ')
+                    .join(" ");
 
                   return {
                     ...message,
-                    content: textContent
-                  }
+                    content: textContent,
+                  };
                 }
-                if (typeof message.content !== 'string') {
+                if (typeof message.content !== "string") {
                   return {
                     ...message,
-                    content: getJsonMarkdown(message.content)
-                  }
+                    content: getJsonMarkdown(message.content),
+                  };
                 }
-                return message
-              }
-            )
+                return message;
+              },
+            );
 
-            setMessages(processedMessages)
-            return processedMessages
+            setMessages(processedMessages);
+            return processedMessages;
           }
         }
       } catch {
-        return null
+        return null;
       }
     },
-    [selectedEndpoint, setMessages]
-  )
+    [selectedEndpoint, setMessages],
+  );
 
-  return { getSession, getSessions }
-}
+  return { getSession, getSessions };
+};
 
-export default useSessionLoader
+export default useSessionLoader;

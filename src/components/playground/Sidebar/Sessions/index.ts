@@ -1,3 +1,3 @@
-import Sessions from './Sessions'
+import Sessions from "./Sessions";
 
-export default Sessions
+export default Sessions;

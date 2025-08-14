@@ -8,8 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
-    "format": "prettier --check \"**/*.{ts,tsx,mdx}\" --cache",
-    "format:fix": "prettier --write \"**/*.{ts,tsx,mdx}\" --cache",
+    "format": "prettier --check \"**/*.{js,jsx,ts,tsx,css,scss,md,mdx,json,yml,yaml}\" --cache",
+    "format:fix": "prettier --write \"**/*.{js,jsx,ts,tsx,css,scss,md,mdx,json,yml,yaml}\" --cache",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
