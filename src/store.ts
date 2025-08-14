@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
 import { type PlaygroundChatMessage, type SessionEntry } from "@/types/playground";
+import { AGNO_CONFIG } from "@/lib/config";
 
 interface Agent {
   value: string;
@@ -79,10 +80,7 @@ export const usePlaygroundStore = create<PlaygroundStore>()(
       hasStorage: false,
       setHasStorage: (hasStorage) => set(() => ({ hasStorage })),
       chatInputRef: { current: null },
-      selectedEndpoint: (process.env.NEXT_PUBLIC_AGNO_API_URL || "http://localhost:7777").replace(
-        /\/$/,
-        ""
-      ),
+      selectedEndpoint: AGNO_CONFIG.API_URL,
       setSelectedEndpoint: (selectedEndpoint) => set(() => ({ selectedEndpoint })),
       agents: [],
       setAgents: (agents) => set({ agents }),

@@ -1,12 +1,17 @@
 import { toast } from "sonner";
 
 import { APIRoutes } from "./routes";
-import { getAgnoHeaders } from "@/lib/config";
+import { AGNO_CONFIG, getAgnoHeaders } from "@/lib/config";
 
 import { Agent, ComboboxAgent, SessionEntry } from "@/types/playground";
 
+const resolveBase = (maybeBase?: string): string => {
+  const trimmed = (maybeBase || "").trim();
+  return trimmed ? trimmed.replace(/\/$/, "") : AGNO_CONFIG.API_URL;
+};
+
 export const getPlaygroundAgentsAPI = async (endpoint: string = ""): Promise<ComboboxAgent[]> => {
-  const url = APIRoutes.GetPlaygroundAgents(endpoint);
+  const url = APIRoutes.GetPlaygroundAgents(resolveBase(endpoint));
   try {
     const response = await fetch(url, {
       method: "GET",
@@ -33,7 +38,7 @@ export const getPlaygroundAgentsAPI = async (endpoint: string = ""): Promise<Com
 };
 
 export const getPlaygroundStatusAPI = async (base: string = ""): Promise<number> => {
-  const response = await fetch(APIRoutes.PlaygroundStatus(base), {
+  const response = await fetch(APIRoutes.PlaygroundStatus(resolveBase(base)), {
     method: "GET",
     headers: getAgnoHeaders(),
   });
@@ -45,7 +50,7 @@ export const getAllPlaygroundSessionsAPI = async (
   agentId: string
 ): Promise<SessionEntry[]> => {
   try {
-    const response = await fetch(APIRoutes.GetPlaygroundSessions(base, agentId), {
+    const response = await fetch(APIRoutes.GetPlaygroundSessions(resolveBase(base), agentId), {
       method: "GET",
       headers: getAgnoHeaders(),
     });
@@ -68,10 +73,13 @@ export const getPlaygroundSessionAPI = async (
   agentId: string,
   sessionId: string
 ) => {
-  const response = await fetch(APIRoutes.GetPlaygroundSession(base, agentId, sessionId), {
-    method: "GET",
-    headers: getAgnoHeaders(),
-  });
+  const response = await fetch(
+    APIRoutes.GetPlaygroundSession(resolveBase(base), agentId, sessionId),
+    {
+      method: "GET",
+      headers: getAgnoHeaders(),
+    }
+  );
   return response.json();
 };
 
@@ -80,10 +88,13 @@ export const deletePlaygroundSessionAPI = async (
   agentId: string,
   sessionId: string
 ) => {
-  const response = await fetch(APIRoutes.DeletePlaygroundSession(base, agentId, sessionId), {
-    method: "DELETE",
-    headers: getAgnoHeaders(),
-  });
+  const response = await fetch(
+    APIRoutes.DeletePlaygroundSession(resolveBase(base), agentId, sessionId),
+    {
+      method: "DELETE",
+      headers: getAgnoHeaders(),
+    }
+  );
   return response;
 };
 
@@ -91,10 +102,11 @@ export const deletePlaygroundSessionAPI = async (
 export const sendMessageToAgentAPI = async (
   message: string,
   agentId: string,
-  sessionId?: string
+  sessionId?: string,
+  base: string = ""
 ) => {
   try {
-    const response = await fetch(APIRoutes.AgentRun(), {
+    const response = await fetch(APIRoutes.AgentRun(resolveBase(base)), {
       method: "POST",
       headers: getAgnoHeaders(),
       body: JSON.stringify({

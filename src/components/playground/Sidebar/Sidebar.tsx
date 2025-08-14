@@ -9,6 +9,7 @@ import Icon from "@/components/ui/icon";
 import { getProviderIcon } from "@/lib/modelProvider";
 import Sessions from "./Sessions";
 import { isValidUrl } from "@/lib/utils";
+import { AGNO_CONFIG } from "@/lib/config";
 import { toast } from "sonner";
 import { useQueryState } from "nuqs";
 import { truncateText } from "@/lib/utils";
@@ -66,16 +67,8 @@ const Endpoint = () => {
   }, [selectedEndpoint]);
 
   useEffect(() => {
-    // Set default Agno API URL from env if endpoint is empty
-    const defaultUrl = (process.env.NEXT_PUBLIC_AGNO_API_URL || "http://localhost:7777").replace(
-      /\/$/,
-      ""
-    );
-    if (
-      !selectedEndpoint ||
-      selectedEndpoint === "http://localhost:7777" ||
-      selectedEndpoint.includes("api.agno.ai")
-    ) {
+    const defaultUrl = AGNO_CONFIG.API_URL;
+    if (!selectedEndpoint) {
       setSelectedEndpoint(defaultUrl);
     }
   }, []);
@@ -175,7 +168,7 @@ const Endpoint = () => {
                   <p className="text-xs font-medium text-gray-800">
                     {isMounted
                       ? truncateText(selectedEndpoint, 21) || ENDPOINT_PLACEHOLDER
-                      : process.env.NEXT_PUBLIC_AGNO_API_URL || "http://localhost:7777"}
+                      : AGNO_CONFIG.API_URL}
                   </p>
                   <div
                     className={`size-2 shrink-0 rounded-full ${getStatusColor(isEndpointActive)}`}

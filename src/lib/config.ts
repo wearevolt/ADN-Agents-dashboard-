@@ -1,7 +1,7 @@
 // Agno API Configuration
 export const AGNO_CONFIG = {
-  API_KEY: process.env.NEXT_PUBLIC_AGNO_API_KEY || "",
-  API_URL: (process.env.NEXT_PUBLIC_AGNO_API_URL || "http://localhost:7777").replace(/\/$/, ""),
+  // Route all client requests through the internal Next.js API proxy
+  API_URL: (process.env.NEXT_PUBLIC_AGNO_PROXY_BASE || "/api/agno").replace(/\/$/, ""),
   ENABLED: (process.env.NEXT_PUBLIC_AGNO_ENABLED ?? "true") === "true",
 };
 
@@ -27,9 +27,7 @@ export const getAgnoHeaders = () => {
     "Content-Type": "application/json",
     Accept: "application/json",
   };
-  if (AGNO_CONFIG.API_KEY) {
-    headers["Authorization"] = `Bearer ${AGNO_CONFIG.API_KEY}`;
-  }
+  // Intentionally no Authorization header on the client
   return headers;
 };
 

@@ -13,7 +13,7 @@ export const TestAgnoConnection: React.FC = () => {
   const [testResults, setTestResults] = useState<string[]>([]);
   const [workingEndpoint, setWorkingEndpoint] = useState<string | null>(null);
 
-  const testSingleEndpoint = async (baseUrl: string, apiKey: string) => {
+  const testSingleEndpoint = async (baseUrl: string, _apiKey: string) => {
     const testEndpoints = [
       { name: "Health", path: "/health" },
       { name: "Status", path: "/status" },
@@ -31,7 +31,6 @@ export const TestAgnoConnection: React.FC = () => {
         const response = await fetch(url, {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${apiKey}`,
             "Content-Type": "application/json",
           },
         });
@@ -73,7 +72,7 @@ export const TestAgnoConnection: React.FC = () => {
     // Тестируем все альтернативные endpoints
     for (const endpoint of ALTERNATIVE_ENDPOINTS) {
       allResults.push(`\n🔍 Тестируем: ${endpoint}`);
-      const { results, hasWorking } = await testSingleEndpoint(endpoint, AGNO_CONFIG.API_KEY);
+      const { results, hasWorking } = await testSingleEndpoint(endpoint, "");
       allResults.push(...results);
 
       if (hasWorking && !foundWorking) {
@@ -104,9 +103,6 @@ export const TestAgnoConnection: React.FC = () => {
         <div className="space-y-2">
           <p className="text-sm text-gray-600">
             <strong>Текущий API URL:</strong> {AGNO_CONFIG.API_URL}
-          </p>
-          <p className="text-sm text-gray-600">
-            <strong>API Key:</strong> {AGNO_CONFIG.API_KEY.substring(0, 20)}...
           </p>
         </div>
 
