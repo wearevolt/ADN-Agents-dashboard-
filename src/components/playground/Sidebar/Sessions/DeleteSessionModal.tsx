@@ -1,35 +1,34 @@
-import { type FC } from 'react'
+import { type FC } from "react";
 
-import { Button } from '@/components/ui/button'
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle
-} from '@/components/ui/dialog'
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface DeleteSessionModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onDelete: () => Promise<void>
-  isDeleting: boolean
+  isOpen: boolean;
+  onClose: () => void;
+  onDelete: () => Promise<void>;
+  isDeleting: boolean;
 }
 
 const DeleteSessionModal: FC<DeleteSessionModalProps> = ({
   isOpen,
   onClose,
   onDelete,
-  isDeleting
+  isDeleting,
 }) => (
   <Dialog open={isOpen} onOpenChange={onClose}>
     <DialogContent className="font-geist">
       <DialogHeader>
         <DialogTitle>Confirm deletion</DialogTitle>
         <DialogDescription>
-          This will permanently delete the session. This action cannot be
-          undone.
+          This will permanently delete the session. This action cannot be undone.
         </DialogDescription>
       </DialogHeader>
       <DialogFooter>
@@ -52,6 +51,6 @@ const DeleteSessionModal: FC<DeleteSessionModalProps> = ({
       </DialogFooter>
     </DialogContent>
   </Dialog>
-)
+);
 
-export default DeleteSessionModal
+export default DeleteSessionModal;

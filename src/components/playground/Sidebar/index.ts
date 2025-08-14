@@ -1,4 +1,4 @@
-import Sidebar from './Sidebar'
+import Sidebar from "./Sidebar";
 
-export default Sidebar
-export { Sidebar }
+export default Sidebar;
+export { Sidebar };

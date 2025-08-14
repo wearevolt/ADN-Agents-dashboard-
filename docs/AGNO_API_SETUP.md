@@ -27,16 +27,16 @@
 
 ```typescript
 export const constructEndpointUrl = (endpoint: string, path: string): string => {
-  const baseUrl = endpoint.replace(/\/$/, '')
-  return `${baseUrl}${path}`
-}
+  const baseUrl = endpoint.replace(/\/$/, "");
+  return `${baseUrl}${path}`;
+};
 
 // Добавьте заголовки аутентификации
 export const getApiHeaders = (apiKey: string) => ({
-  'Content-Type': 'application/json',
-  'Authorization': `Bearer ${apiKey}`,
-  'X-API-Key': apiKey
-})
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${apiKey}`,
+  "X-API-Key": apiKey,
+});
 ```
 
 ### 4. Обновление хука для работы с API
@@ -46,41 +46,38 @@ export const getApiHeaders = (apiKey: string) => ({
 ```typescript
 const handleStreamResponse = async (message: string) => {
   try {
-    const response = await fetch(constructEndpointUrl(selectedEndpoint, '/v1/chat/completions'), {
-      method: 'POST',
+    const response = await fetch(constructEndpointUrl(selectedEndpoint, "/v1/chat/completions"), {
+      method: "POST",
       headers: getApiHeaders(apiKey), // Используйте API-ключ из настроек
       body: JSON.stringify({
         model: selectedModel,
-        messages: [
-          ...messages,
-          { role: 'user', content: message }
-        ],
-        stream: true
-      })
-    })
+        messages: [...messages, { role: "user", content: message }],
+        stream: true,
+      }),
+    });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     // Обработка потокового ответа
-    const reader = response.body?.getReader()
-    if (!reader) throw new Error('No reader available')
+    const reader = response.body?.getReader();
+    if (!reader) throw new Error("No reader available");
 
     // Обработка чанков потока
     while (true) {
-      const { done, value } = await reader.read()
-      if (done) break
-      
+      const { done, value } = await reader.read();
+      if (done) break;
+
       // Парсинг и обработка чанка
-      const chunk = new TextDecoder().decode(value)
+      const chunk = new TextDecoder().decode(value);
       // Обработка chunk данных...
     }
   } catch (error) {
-    console.error('Error in stream handler:', error)
+    console.error("Error in stream handler:", error);
     // Обработка ошибки...
   }
-}
+};
 ```
 
 ### 5. Добавление хранения API-ключа
@@ -136,14 +133,17 @@ const ApiKeyModal = ({ isOpen, onClose, onSave }) => {
 ### 7. Возможные проблемы и решения
 
 **Проблема: CORS ошибки**
+
 - Убедитесь, что Agno API сервер настроен для работы с вашим доменом
 - Добавьте необходимые CORS заголовки на сервере
 
 **Проблема: Ошибки аутентификации**
+
 - Проверьте правильность API-ключа
 - Убедитесь, что ключ имеет необходимые разрешения
 
 **Проблема: Таймауты**
+
 - Увеличьте timeout для длительных запросов
 - Настройте retry логику для обработки временных сбоев
 
@@ -160,24 +160,27 @@ AGNO_API_KEY=your-api-key-here
 И используйте их в коде:
 
 ```typescript
-const defaultEndpoint = process.env.NEXT_PUBLIC_AGNO_API_URL || 'http://localhost:7777'
-const defaultModel = process.env.NEXT_PUBLIC_DEFAULT_MODEL || 'gpt-3.5-turbo'
+const defaultEndpoint = process.env.NEXT_PUBLIC_AGNO_API_URL || "http://localhost:7777";
+const defaultModel = process.env.NEXT_PUBLIC_DEFAULT_MODEL || "gpt-3.5-turbo";
 ```
 
 ## Дополнительные настройки
 
 ### Обработка ошибок
+
 - Добавьте обработку различных типов ошибок API
 - Реализуйте retry логику для временных сбоев
 - Добавьте пользовательские сообщения об ошибках
 
 ### Кэширование
+
 - Настройте кэширование ответов для улучшения производительности
 - Используйте local storage для сохранения настроек
 
 ### Безопасность
+
 - Никогда не сохраняйте API-ключи в коде
 - Используйте переменные окружения для конфиденциальных данных
 - Реализуйте валидацию на стороне клиента
 
-После выполнения всех этих шагов ваше приложение будет готово к работе с реальным Agno API! 
+После выполнения всех этих шагов ваше приложение будет готово к работе с реальным Agno API!

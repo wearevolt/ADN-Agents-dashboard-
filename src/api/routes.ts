@@ -1,4 +1,4 @@
-import { AGNO_CONFIG, AGNO_ENDPOINTS } from '@/lib/config'
+import { AGNO_CONFIG, AGNO_ENDPOINTS } from "@/lib/config";
 
 export const APIRoutes = {
   // Agno API Routes
@@ -14,13 +14,11 @@ export const APIRoutes = {
     PlaygroundApiUrl: string = AGNO_CONFIG.API_URL,
     agentId: string,
     sessionId: string
-  ) =>
-    `${PlaygroundApiUrl}${AGNO_ENDPOINTS.SESSIONS}/${agentId}/${sessionId}`,
+  ) => `${PlaygroundApiUrl}${AGNO_ENDPOINTS.SESSIONS}/${agentId}/${sessionId}`,
 
   DeletePlaygroundSession: (
     PlaygroundApiUrl: string = AGNO_CONFIG.API_URL,
     agentId: string,
     sessionId: string
-  ) =>
-    `${PlaygroundApiUrl}${AGNO_ENDPOINTS.SESSIONS}/${agentId}/${sessionId}`
-}
+  ) => `${PlaygroundApiUrl}${AGNO_ENDPOINTS.SESSIONS}/${agentId}/${sessionId}`,
+};

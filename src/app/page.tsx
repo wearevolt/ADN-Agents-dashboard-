@@ -1,38 +1,38 @@
-'use client'
+"use client";
 
-import { useState, Suspense } from 'react'
-import Sidebar from '@/components/playground/Sidebar'
-import Dashboard from '@/components/Dashboard'
-import { ChatModal } from '@/components/ChatModal'
-import LoginScreen from '@/components/LoginScreen'
+import { useState, Suspense } from "react";
+import Sidebar from "@/components/playground/Sidebar";
+import Dashboard from "@/components/Dashboard";
+import { ChatModal } from "@/components/ChatModal";
+import LoginScreen from "@/components/LoginScreen";
 
 interface User {
-  name: string
-  email: string
+  name: string;
+  email: string;
 }
 
 export default function Home() {
-  const [showChatModal, setShowChatModal] = useState(false)
-  const [user, setUser] = useState<User | null>(null)
+  const [showChatModal, setShowChatModal] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
 
   const handleOpenChat = () => {
-    setShowChatModal(true)
-  }
+    setShowChatModal(true);
+  };
 
   const handleCloseChat = () => {
-    setShowChatModal(false)
-  }
+    setShowChatModal(false);
+  };
 
   const handleLogin = (userInfo: User) => {
-    setUser(userInfo)
-  }
+    setUser(userInfo);
+  };
 
   const handleLogout = () => {
-    setUser(null)
-  }
+    setUser(null);
+  };
 
   if (!user) {
-    return <LoginScreen onLogin={handleLogin} />
+    return <LoginScreen onLogin={handleLogin} />;
   }
 
   return (
@@ -43,5 +43,5 @@ export default function Home() {
         <ChatModal isOpen={showChatModal} onClose={handleCloseChat} />
       </div>
     </Suspense>
-  )
-} 
+  );
+}

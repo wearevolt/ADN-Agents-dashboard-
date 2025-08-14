@@ -1,0 +1,27 @@
+# Build output
+.next
+out
+build
+coverage
+
+# Dependencies
+node_modules
+
+# VCS
+.git
+
+# Locks
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Env files
+.env*
+
+# Assets
+public
+**/*.svg
+**/*.png
+**/*.jpg
+**/*.jpeg
+**/*.gif

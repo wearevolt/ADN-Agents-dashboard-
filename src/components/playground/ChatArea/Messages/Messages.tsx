@@ -1,34 +1,34 @@
-import type { PlaygroundChatMessage } from '@/types/playground'
+import type { PlaygroundChatMessage } from "@/types/playground";
 
-import { AgentMessage, UserMessage } from './MessageItem'
-import Tooltip from '@/components/ui/tooltip'
-import { memo } from 'react'
+import { AgentMessage, UserMessage } from "./MessageItem";
+import Tooltip from "@/components/ui/tooltip";
+import { memo } from "react";
 import {
   ToolCallProps,
   ReasoningStepProps,
   ReasoningProps,
   ReferenceData,
-  Reference
-} from '@/types/playground'
-import React, { type FC } from 'react'
-import ChatBlankState from './ChatBlankState'
-import Icon from '@/components/ui/icon'
+  Reference,
+} from "@/types/playground";
+import React, { type FC } from "react";
+import ChatBlankState from "./ChatBlankState";
+import Icon from "@/components/ui/icon";
 
 interface MessageListProps {
-  messages: PlaygroundChatMessage[]
+  messages: PlaygroundChatMessage[];
 }
 
 interface MessageWrapperProps {
-  message: PlaygroundChatMessage
-  isLastMessage: boolean
+  message: PlaygroundChatMessage;
+  isLastMessage: boolean;
 }
 
 interface ReferenceProps {
-  references: ReferenceData[]
+  references: ReferenceData[];
 }
 
 interface ReferenceItemProps {
-  reference: Reference
+  reference: Reference;
 }
 
 const ReferenceItem: FC<ReferenceItemProps> = ({ reference }) => (
@@ -36,15 +36,12 @@ const ReferenceItem: FC<ReferenceItemProps> = ({ reference }) => (
     <p className="text-sm font-medium text-gray-900">{reference.name}</p>
     <p className="truncate text-xs text-gray-600">{reference.content}</p>
   </div>
-)
+);
 
 const References: FC<ReferenceProps> = ({ references }) => (
   <div className="flex flex-col gap-4">
     {references.map((referenceData, index) => (
-      <div
-        key={`${referenceData.query}-${index}`}
-        className="flex flex-col gap-3"
-      >
+      <div key={`${referenceData.query}-${index}`} className="flex flex-col gap-3">
         <div className="flex flex-wrap gap-3">
           {referenceData.references.map((reference, refIndex) => (
             <ReferenceItem
@@ -56,42 +53,40 @@ const References: FC<ReferenceProps> = ({ references }) => (
       </div>
     ))}
   </div>
-)
+);
 
 const AgentMessageWrapper = ({ message }: MessageWrapperProps) => {
   return (
     <div className="flex flex-col gap-y-9">
-      {message.extra_data?.reasoning_steps &&
-        message.extra_data.reasoning_steps.length > 0 && (
-          <div className="flex items-start gap-4">
-            <Tooltip
-              delayDuration={0}
-              content={<p className="text-gray-700">Reasoning</p>}
-              side="top"
-            >
-              <Icon type="reasoning" size="sm" />
-            </Tooltip>
-            <div className="flex flex-col gap-3">
-              <p className="text-xs uppercase">Reasoning</p>
-              <Reasonings reasoning={message.extra_data.reasoning_steps} />
-            </div>
+      {message.extra_data?.reasoning_steps && message.extra_data.reasoning_steps.length > 0 && (
+        <div className="flex items-start gap-4">
+          <Tooltip
+            delayDuration={0}
+            content={<p className="text-gray-700">Reasoning</p>}
+            side="top"
+          >
+            <Icon type="reasoning" size="sm" />
+          </Tooltip>
+          <div className="flex flex-col gap-3">
+            <p className="text-xs uppercase">Reasoning</p>
+            <Reasonings reasoning={message.extra_data.reasoning_steps} />
           </div>
-        )}
-      {message.extra_data?.references &&
-        message.extra_data.references.length > 0 && (
-          <div className="flex items-start gap-4">
-            <Tooltip
-              delayDuration={0}
-              content={<p className="text-gray-700">References</p>}
-              side="top"
-            >
-              <Icon type="references" size="sm" />
-            </Tooltip>
-            <div className="flex flex-col gap-3">
-              <References references={message.extra_data.references} />
-            </div>
+        </div>
+      )}
+      {message.extra_data?.references && message.extra_data.references.length > 0 && (
+        <div className="flex items-start gap-4">
+          <Tooltip
+            delayDuration={0}
+            content={<p className="text-gray-700">References</p>}
+            side="top"
+          >
+            <Icon type="references" size="sm" />
+          </Tooltip>
+          <div className="flex flex-col gap-3">
+            <References references={message.extra_data.references} />
           </div>
-        )}
+        </div>
+      )}
       {message.tool_calls && message.tool_calls.length > 0 && (
         <div className="flex items-start gap-3">
           <Tooltip
@@ -111,8 +106,7 @@ const AgentMessageWrapper = ({ message }: MessageWrapperProps) => {
             {message.tool_calls.map((toolCall, index) => (
               <ToolComponent
                 key={
-                  toolCall.tool_call_id ||
-                  `${toolCall.tool_name}-${toolCall.created_at}-${index}`
+                  toolCall.tool_call_id || `${toolCall.tool_name}-${toolCall.created_at}-${index}`
                 }
                 tools={toolCall}
               />
@@ -122,8 +116,8 @@ const AgentMessageWrapper = ({ message }: MessageWrapperProps) => {
       )}
       <AgentMessage message={message} />
     </div>
-  )
-}
+  );
+};
 const Reasoning: FC<ReasoningStepProps> = ({ index, stepTitle }) => (
   <div className="flex items-center gap-2 text-gray-600">
     <div className="flex h-[20px] items-center rounded-md bg-gray-100 p-2">
@@ -131,7 +125,7 @@ const Reasoning: FC<ReasoningStepProps> = ({ index, stepTitle }) => (
     </div>
     <p className="text-xs">{stepTitle}</p>
   </div>
-)
+);
 const Reasonings: FC<ReasoningProps> = ({ reasoning }) => (
   <div className="flex flex-col items-start justify-center gap-2">
     {reasoning.map((title, index) => (
@@ -142,38 +136,32 @@ const Reasonings: FC<ReasoningProps> = ({ reasoning }) => (
       />
     ))}
   </div>
-)
+);
 
 const ToolComponent = memo(({ tools }: ToolCallProps) => (
   <div className="cursor-default rounded-full bg-blue-100 px-2 py-1.5 text-xs">
     <p className="font-dmmono uppercase text-blue-700">{tools.tool_name}</p>
   </div>
-))
-ToolComponent.displayName = 'ToolComponent'
+));
+ToolComponent.displayName = "ToolComponent";
 const Messages = ({ messages }: MessageListProps) => {
   if (messages.length === 0) {
-    return <ChatBlankState />
+    return <ChatBlankState />;
   }
 
   return (
     <>
       {messages.map((message, index) => {
-        const key = `${message.role}-${message.created_at}-${index}`
-        const isLastMessage = index === messages.length - 1
+        const key = `${message.role}-${message.created_at}-${index}`;
+        const isLastMessage = index === messages.length - 1;
 
-        if (message.role === 'agent') {
-          return (
-            <AgentMessageWrapper
-              key={key}
-              message={message}
-              isLastMessage={isLastMessage}
-            />
-          )
+        if (message.role === "agent") {
+          return <AgentMessageWrapper key={key} message={message} isLastMessage={isLastMessage} />;
         }
-        return <UserMessage key={key} message={message} />
+        return <UserMessage key={key} message={message} />;
       })}
     </>
-  )
-}
+  );
+};
 
-export default Messages
+export default Messages;

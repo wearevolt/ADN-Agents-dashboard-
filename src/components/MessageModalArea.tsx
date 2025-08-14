@@ -1,12 +1,12 @@
-'use client'
+"use client";
 
-import { usePlaygroundStore } from '@/store'
-import Messages from './playground/ChatArea/Messages'
-import ScrollToBottom from '@/components/playground/ChatArea/ScrollToBottom'
-import { StickToBottom } from 'use-stick-to-bottom'
+import { usePlaygroundStore } from "@/store";
+import Messages from "./playground/ChatArea/Messages";
+import ScrollToBottom from "@/components/playground/ChatArea/ScrollToBottom";
+import { StickToBottom } from "use-stick-to-bottom";
 
 const MessageModalArea = () => {
-  const { messages } = usePlaygroundStore()
+  const { messages } = usePlaygroundStore();
 
   return (
     <StickToBottom
@@ -21,7 +21,7 @@ const MessageModalArea = () => {
       </StickToBottom.Content>
       <ScrollToBottom />
     </StickToBottom>
-  )
-}
+  );
+};
 
-export default MessageModalArea 
+export default MessageModalArea;
