@@ -37,22 +37,14 @@ const filterProps = (props: object) => {
 
 const UnorderedList = ({ className, ...props }: UnorderedListProps) => (
   <ul
-    className={cn(
-      className,
-      PARAGRAPH_SIZES.lead,
-      "flex list-disc flex-col pl-10",
-    )}
+    className={cn(className, PARAGRAPH_SIZES.lead, "flex list-disc flex-col pl-10")}
     {...filterProps(props)}
   />
 );
 
 const OrderedList = ({ className, ...props }: OrderedListProps) => (
   <ol
-    className={cn(
-      className,
-      PARAGRAPH_SIZES.lead,
-      "flex list-decimal flex-col pl-10",
-    )}
+    className={cn(className, PARAGRAPH_SIZES.lead, "flex list-decimal flex-col pl-10")}
     {...filterProps(props)}
   />
 );
@@ -62,10 +54,7 @@ const Paragraph = ({ className, ...props }: ParagraphProps) => (
 );
 
 const EmphasizedText = ({ className, ...props }: EmphasizedTextProps) => (
-  <em
-    className={cn(className, "PARAGRAPH_SIZES.lead")}
-    {...filterProps(props)}
-  />
+  <em className={cn(className, "PARAGRAPH_SIZES.lead")} {...filterProps(props)} />
 );
 
 const ItalicText = ({ className, ...props }: ItalicTextProps) => (
@@ -73,24 +62,15 @@ const ItalicText = ({ className, ...props }: ItalicTextProps) => (
 );
 
 const StrongText = ({ className, ...props }: StrongTextProps) => (
-  <strong
-    className={cn(className, "PARAGRAPH_SIZES.lead")}
-    {...filterProps(props)}
-  />
+  <strong className={cn(className, "PARAGRAPH_SIZES.lead")} {...filterProps(props)} />
 );
 
 const BoldText = ({ className, ...props }: BoldTextProps) => (
-  <b
-    className={cn(className, "PARAGRAPH_SIZES.lead")}
-    {...filterProps(props)}
-  />
+  <b className={cn(className, "PARAGRAPH_SIZES.lead")} {...filterProps(props)} />
 );
 
 const UnderlinedText = ({ className, ...props }: UnderlinedTextProps) => (
-  <u
-    className={cn(className, "underline", PARAGRAPH_SIZES.lead)}
-    {...filterProps(props)}
-  />
+  <u className={cn(className, "underline", PARAGRAPH_SIZES.lead)} {...filterProps(props)} />
 );
 
 const DeletedText = ({ className, ...props }: DeletedTextProps) => (
@@ -101,17 +81,11 @@ const DeletedText = ({ className, ...props }: DeletedTextProps) => (
 );
 
 const HorizontalRule = ({ className, ...props }: HorizontalRuleProps) => (
-  <hr
-    className={cn(className, "mx-auto w-48 border-b border-border")}
-    {...filterProps(props)}
-  />
+  <hr className={cn(className, "mx-auto w-48 border-b border-border")} {...filterProps(props)} />
 );
 
 const Blockquote = ({ className, ...props }: BlockquoteProps) => (
-  <blockquote
-    className={cn(className, PARAGRAPH_SIZES.lead)}
-    {...filterProps(props)}
-  />
+  <blockquote className={cn(className, PARAGRAPH_SIZES.lead)} {...filterProps(props)} />
 );
 
 const AnchorLink = ({ className, ...props }: AnchorLinkProps) => (

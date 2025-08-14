@@ -15,32 +15,17 @@ const AudioItem = memo(({ audio }: { audio: AudioData }) => {
       return audio.url;
     }
     if (audio.base64_audio) {
-      return decodeBase64Audio(
-        audio.base64_audio,
-        audio.mime_type || "audio/wav",
-      );
+      return decodeBase64Audio(audio.base64_audio, audio.mime_type || "audio/wav");
     }
     if (audio.content) {
-      return decodeBase64Audio(
-        audio.content,
-        "audio/pcm16",
-        audio.sample_rate,
-        audio.channels,
-      );
+      return decodeBase64Audio(audio.content, "audio/pcm16", audio.sample_rate, audio.channels);
     }
     return null;
   }, [audio]);
 
   if (!audioUrl) return null;
 
-  return (
-    <audio
-      src={audioUrl}
-      controls
-      className="w-full rounded-lg"
-      preload="metadata"
-    />
-  );
+  return <audio src={audioUrl} controls className="w-full rounded-lg" preload="metadata" />;
 });
 
 AudioItem.displayName = "AudioItem";

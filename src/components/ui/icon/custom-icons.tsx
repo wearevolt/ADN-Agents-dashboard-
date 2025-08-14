@@ -97,125 +97,41 @@ export const MistralLogo: FC = ({ ...props }) => (
     xmlns="http://www.w3.org/2000/svg"
     {...props}
   >
-    <path
-      opacity="0.7"
-      d="M19.4156 0.571411H15.6753V4.31167H19.4156V0.571411Z"
-      fill="#FAFAFA"
-    />
-    <path
-      d="M21.2857 0.571411H17.5454V4.31167H21.2857V0.571411Z"
-      fill="#FAFAFA"
-    />
+    <path opacity="0.7" d="M19.4156 0.571411H15.6753V4.31167H19.4156V0.571411Z" fill="#FAFAFA" />
+    <path d="M21.2857 0.571411H17.5454V4.31167H21.2857V0.571411Z" fill="#FAFAFA" />
     <path
       d="M4.45462 0.571411H0.714355V4.31167H4.45462V0.571411Z"
       fill="#FAFAFA"
       fillOpacity="0.7"
     />
-    <path
-      d="M4.45462 4.31165H0.714355V8.05191H4.45462V4.31165Z"
-      fill="#FAFAFA"
-      fillOpacity="0.7"
-    />
-    <path
-      d="M4.45462 8.05188H0.714355V11.7921H4.45462V8.05188Z"
-      fill="#FAFAFA"
-      fillOpacity="0.7"
-    />
-    <path
-      d="M4.45462 11.7922H0.714355V15.5325H4.45462V11.7922Z"
-      fill="#FAFAFA"
-      fillOpacity="0.7"
-    />
-    <path
-      d="M4.45462 15.5323H0.714355V19.2726H4.45462V15.5323Z"
-      fill="#FAFAFA"
-      fillOpacity="0.7"
-    />
-    <path
-      d="M6.32473 0.571411H2.58447V4.31167H6.32473V0.571411Z"
-      fill="#FAFAFA"
-    />
-    <path
-      d="M21.2857 4.31165H17.5454V8.05191H21.2857V4.31165Z"
-      fill="#FAFAFA"
-    />
-    <path
-      d="M6.32473 4.31165H2.58447V8.05191H6.32473V4.31165Z"
-      fill="#FAFAFA"
-    />
-    <path
-      opacity="0.7"
-      d="M15.6753 4.31165H11.9351V8.05191H15.6753V4.31165Z"
-      fill="#FAFAFA"
-    />
-    <path
-      d="M17.5454 4.31165H13.8052V8.05191H17.5454V4.31165Z"
-      fill="#FAFAFA"
-    />
+    <path d="M4.45462 4.31165H0.714355V8.05191H4.45462V4.31165Z" fill="#FAFAFA" fillOpacity="0.7" />
+    <path d="M4.45462 8.05188H0.714355V11.7921H4.45462V8.05188Z" fill="#FAFAFA" fillOpacity="0.7" />
+    <path d="M4.45462 11.7922H0.714355V15.5325H4.45462V11.7922Z" fill="#FAFAFA" fillOpacity="0.7" />
+    <path d="M4.45462 15.5323H0.714355V19.2726H4.45462V15.5323Z" fill="#FAFAFA" fillOpacity="0.7" />
+    <path d="M6.32473 0.571411H2.58447V4.31167H6.32473V0.571411Z" fill="#FAFAFA" />
+    <path d="M21.2857 4.31165H17.5454V8.05191H21.2857V4.31165Z" fill="#FAFAFA" />
+    <path d="M6.32473 4.31165H2.58447V8.05191H6.32473V4.31165Z" fill="#FAFAFA" />
+    <path opacity="0.7" d="M15.6753 4.31165H11.9351V8.05191H15.6753V4.31165Z" fill="#FAFAFA" />
+    <path d="M17.5454 4.31165H13.8052V8.05191H17.5454V4.31165Z" fill="#FAFAFA" />
     <path d="M10.065 4.31165H6.32471V8.05191H10.065V4.31165Z" fill="#FAFAFA" />
-    <path
-      d="M13.8052 8.05188H10.0649V11.7921H13.8052V8.05188Z"
-      fill="#FAFAFA"
-    />
-    <path
-      d="M17.5454 8.05188H13.8052V11.7921H17.5454V8.05188Z"
-      fill="#FAFAFA"
-    />
+    <path d="M13.8052 8.05188H10.0649V11.7921H13.8052V8.05188Z" fill="#FAFAFA" />
+    <path d="M17.5454 8.05188H13.8052V11.7921H17.5454V8.05188Z" fill="#FAFAFA" />
     <path d="M10.065 8.05188H6.32471V11.7921H10.065V8.05188Z" fill="#FAFAFA" />
-    <path
-      opacity="0.7"
-      d="M11.9351 11.7922H8.19482V15.5325H11.9351V11.7922Z"
-      fill="#FAFAFA"
-    />
-    <path
-      d="M13.8052 11.7922H10.0649V15.5325H13.8052V11.7922Z"
-      fill="#FAFAFA"
-    />
-    <path
-      d="M21.2857 8.05188H17.5454V11.7921H21.2857V8.05188Z"
-      fill="#FAFAFA"
-    />
-    <path
-      d="M6.32473 8.05188H2.58447V11.7921H6.32473V8.05188Z"
-      fill="#FAFAFA"
-    />
-    <path
-      opacity="0.7"
-      d="M19.4156 11.7922H15.6753V15.5325H19.4156V11.7922Z"
-      fill="#FAFAFA"
-    />
-    <path
-      d="M21.2857 11.7922H17.5454V15.5325H21.2857V11.7922Z"
-      fill="#FAFAFA"
-    />
-    <path
-      opacity="0.7"
-      d="M19.4156 15.5323H15.6753V19.2726H19.4156V15.5323Z"
-      fill="#FAFAFA"
-    />
-    <path
-      d="M6.32473 11.7922H2.58447V15.5325H6.32473V11.7922Z"
-      fill="#FAFAFA"
-    />
-    <path
-      d="M21.2857 15.5323H17.5454V19.2726H21.2857V15.5323Z"
-      fill="#FAFAFA"
-    />
-    <path
-      d="M6.32473 15.5323H2.58447V19.2726H6.32473V15.5323Z"
-      fill="#FAFAFA"
-    />
+    <path opacity="0.7" d="M11.9351 11.7922H8.19482V15.5325H11.9351V11.7922Z" fill="#FAFAFA" />
+    <path d="M13.8052 11.7922H10.0649V15.5325H13.8052V11.7922Z" fill="#FAFAFA" />
+    <path d="M21.2857 8.05188H17.5454V11.7921H21.2857V8.05188Z" fill="#FAFAFA" />
+    <path d="M6.32473 8.05188H2.58447V11.7921H6.32473V8.05188Z" fill="#FAFAFA" />
+    <path opacity="0.7" d="M19.4156 11.7922H15.6753V15.5325H19.4156V11.7922Z" fill="#FAFAFA" />
+    <path d="M21.2857 11.7922H17.5454V15.5325H21.2857V11.7922Z" fill="#FAFAFA" />
+    <path opacity="0.7" d="M19.4156 15.5323H15.6753V19.2726H19.4156V15.5323Z" fill="#FAFAFA" />
+    <path d="M6.32473 11.7922H2.58447V15.5325H6.32473V11.7922Z" fill="#FAFAFA" />
+    <path d="M21.2857 15.5323H17.5454V19.2726H21.2857V15.5323Z" fill="#FAFAFA" />
+    <path d="M6.32473 15.5323H2.58447V19.2726H6.32473V15.5323Z" fill="#FAFAFA" />
   </svg>
 );
 
 export const GeminiLogo: FC = () => (
-  <svg
-    width="20"
-    height="20"
-    viewBox="0 0 20 20"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path
       d="M20 10.02C17.4052 10.1792 14.9583 11.2818 13.12 13.12C11.2818 14.9583 10.1792 17.4052 10.02 20H9.98C9.82103 17.4051 8.71853 14.958 6.88025 13.1197C5.04198 11.2815 2.59485 10.179 0 10.02L0 9.98C2.59485 9.82103 5.04198 8.71853 6.88025 6.88025C8.71853 5.04198 9.82103 2.59485 9.98 0L10.02 0C10.1792 2.59476 11.2818 5.04173 13.12 6.87996C14.9583 8.71818 17.4052 9.82076 20 9.98V10.02Z"
       fill="#FAFAFA"
@@ -423,10 +339,7 @@ export const XaiLogo: FC = ({ ...props }) => (
       d="M6.71784 20.9178L8.5643 18.2311L6.71784 15.5444L3.0249 20.9178H6.71784Z"
       fill="#FAFAFA"
     />
-    <path
-      d="M11.3337 20.9179H15.0266L6.71784 8.82727H3.0249L11.3337 20.9179Z"
-      fill="#FAFAFA"
-    />
+    <path d="M11.3337 20.9179H15.0266L6.71784 8.82727H3.0249L11.3337 20.9179Z" fill="#FAFAFA" />
     <path
       d="M18.9752 4.42566L15.9502 8.82726L16.2527 20.9179H18.6727L18.9752 4.42566Z"
       fill="#FAFAFA"
@@ -487,12 +400,7 @@ export const NextjsTag: FC = ({ ...props }) => (
         shapeRendering="crispEdges"
       />
       <g clipPath="url(#clip0_2859_5307)">
-        <rect
-          width="20"
-          height="20"
-          transform="translate(16.1167 6)"
-          fill="white"
-        />
+        <rect width="20" height="20" transform="translate(16.1167 6)" fill="white" />
         <path
           d="M30.9598 24.7533C30.8854 24.7927 30.8917 24.8052 30.9629 24.7689C30.9861 24.7595 31.0055 24.7464 31.0223 24.7308C31.0223 24.7177 31.0223 24.7177 30.9598 24.7533ZM31.1098 24.672C31.0742 24.7014 31.0742 24.7014 31.1167 24.682C31.1392 24.6689 31.1592 24.6564 31.1592 24.6527C31.1592 24.6358 31.1492 24.6395 31.1098 24.672ZM31.2073 24.6133C31.1717 24.6427 31.1717 24.6427 31.2142 24.6233C31.2373 24.6102 31.2567 24.5964 31.2567 24.5933C31.2567 24.5777 31.2467 24.5808 31.2073 24.6133ZM31.3061 24.5552C31.2704 24.5845 31.2704 24.5845 31.3117 24.5645C31.3348 24.552 31.3542 24.5389 31.3542 24.5352C31.3542 24.5195 31.3442 24.5227 31.3061 24.5552ZM31.4392 24.467C31.3711 24.5127 31.3473 24.542 31.4098 24.5095C31.4517 24.4839 31.5229 24.4277 31.5104 24.4277C31.4836 24.4377 31.4611 24.4545 31.4386 24.467H31.4392ZM25.4623 6.00704C25.4167 6.01016 25.2798 6.02266 25.1598 6.03266C22.3173 6.29016 19.6579 7.82016 17.9723 10.177C17.0404 11.4689 16.4354 12.9695 16.2073 14.5452C16.1267 15.0952 16.1167 15.2577 16.1167 16.0033C16.1167 16.7483 16.1267 16.9083 16.2073 17.4583C16.7517 21.2152 19.4242 24.3689 23.0467 25.5377C23.6986 25.7458 24.3817 25.8895 25.1598 25.9777C25.4623 26.0102 26.7704 26.0102 27.0729 25.9777C28.4179 25.8277 29.5536 25.4958 30.6773 24.9227C30.8498 24.8352 30.8823 24.812 30.8592 24.7927C30.3092 24.067 29.7692 23.3408 29.2286 22.6083L27.6304 20.4502L25.6286 17.4845C24.9611 16.492 24.2911 15.502 23.6104 14.5195C23.6036 14.5195 23.5948 15.8377 23.5911 17.4452C23.5842 20.2608 23.5842 20.3752 23.5486 20.4402C23.5129 20.5183 23.4542 20.5833 23.3761 20.6195C23.3142 20.6489 23.2586 20.6552 22.9629 20.6552H22.6248L22.5367 20.6002C22.4817 20.5645 22.4361 20.5152 22.4067 20.457L22.3642 20.3689L22.3673 16.4495L22.3742 12.5302L22.4361 12.452C22.4754 12.4039 22.5242 12.3645 22.5792 12.3352C22.6611 12.2958 22.6936 12.2895 23.0317 12.2895C23.4286 12.2895 23.4942 12.3052 23.5986 12.4195C24.4086 13.627 25.2161 14.8377 26.0104 16.052C27.3098 18.022 29.0836 20.7102 29.9554 22.0289L31.5411 24.4283L31.6192 24.3764C32.3811 23.8683 33.0742 23.2633 33.6723 22.5733C34.9323 21.1308 35.7498 19.3564 36.0267 17.4627C36.1073 16.9127 36.1173 16.7495 36.1173 16.0045C36.1173 15.2589 36.1073 15.0995 36.0267 14.5495C35.4823 10.7927 32.8098 7.63891 29.1873 6.46954C28.5098 6.25516 27.8129 6.10891 27.1073 6.03391C26.9179 6.01454 25.6254 5.99141 25.4629 6.00829L25.4623 6.00704ZM29.5542 12.0552C29.6486 12.1002 29.7198 12.1852 29.7523 12.2827C29.7692 12.3352 29.7723 13.422 29.7692 15.8702L29.7623 19.3852L29.1442 18.4352L28.5223 17.4845V14.9327C28.5223 13.2783 28.5292 12.3508 28.5379 12.3052C28.5673 12.2008 28.6386 12.1133 28.7336 12.0583C28.8111 12.0189 28.8411 12.0158 29.1504 12.0158C29.4398 12.0158 29.4892 12.0189 29.5542 12.0552Z"
           fill="black"
@@ -525,15 +433,8 @@ export const NextjsTag: FC = ({ ...props }) => (
         <feOffset dy="10" />
         <feGaussianBlur stdDeviation="7.5" />
         <feComposite in2="hardAlpha" operator="out" />
-        <feColorMatrix
-          type="matrix"
-          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0"
-        />
-        <feBlend
-          mode="normal"
-          in2="BackgroundImageFix"
-          result="effect1_dropShadow_2859_5307"
-        />
+        <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0" />
+        <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_2859_5307" />
         <feColorMatrix
           in="SourceAlpha"
           type="matrix"
@@ -549,10 +450,7 @@ export const NextjsTag: FC = ({ ...props }) => (
         <feOffset dy="4" />
         <feGaussianBlur stdDeviation="3" />
         <feComposite in2="hardAlpha" operator="out" />
-        <feColorMatrix
-          type="matrix"
-          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0"
-        />
+        <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0" />
         <feBlend
           mode="normal"
           in2="effect1_dropShadow_2859_5307"
@@ -566,12 +464,7 @@ export const NextjsTag: FC = ({ ...props }) => (
         />
       </filter>
       <clipPath id="clip0_2859_5307">
-        <rect
-          width="20"
-          height="20"
-          fill="white"
-          transform="translate(16.1167 6)"
-        />
+        <rect width="20" height="20" fill="white" transform="translate(16.1167 6)" />
       </clipPath>
     </defs>
   </svg>
@@ -630,15 +523,8 @@ export const ShadcnTag: FC = ({ ...props }) => (
         <feOffset dy="10" />
         <feGaussianBlur stdDeviation="7.5" />
         <feComposite in2="hardAlpha" operator="out" />
-        <feColorMatrix
-          type="matrix"
-          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0"
-        />
-        <feBlend
-          mode="normal"
-          in2="BackgroundImageFix"
-          result="effect1_dropShadow_2859_5310"
-        />
+        <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0" />
+        <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_2859_5310" />
         <feColorMatrix
           in="SourceAlpha"
           type="matrix"
@@ -654,10 +540,7 @@ export const ShadcnTag: FC = ({ ...props }) => (
         <feOffset dy="4" />
         <feGaussianBlur stdDeviation="3" />
         <feComposite in2="hardAlpha" operator="out" />
-        <feColorMatrix
-          type="matrix"
-          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0"
-        />
+        <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0" />
         <feBlend
           mode="normal"
           in2="effect1_dropShadow_2859_5310"
@@ -670,21 +553,11 @@ export const ShadcnTag: FC = ({ ...props }) => (
           result="shape"
         />
       </filter>
-      <pattern
-        id="pattern0_2859_5310"
-        patternContentUnits="objectBoundingBox"
-        width="1"
-        height="1"
-      >
+      <pattern id="pattern0_2859_5310" patternContentUnits="objectBoundingBox" width="1" height="1">
         <use xlinkHref="#image0_2859_5310" transform="scale(0.005)" />
       </pattern>
       <clipPath id="clip0_2859_5310">
-        <rect
-          width="20"
-          height="20"
-          fill="white"
-          transform="translate(16.1167 6)"
-        />
+        <rect width="20" height="20" fill="white" transform="translate(16.1167 6)" />
       </clipPath>
       <image
         id="image0_2859_5310"
@@ -725,10 +598,7 @@ export const TailwindTag: FC = ({ ...props }) => (
         width="13"
         height="8"
       >
-        <path
-          d="M20.1167 12.3999H32.1167V19.5999H20.1167V12.3999Z"
-          fill="white"
-        />
+        <path d="M20.1167 12.3999H32.1167V19.5999H20.1167V12.3999Z" fill="white" />
       </mask>
       <g mask="url(#mask0_2859_5313)">
         <path
@@ -765,15 +635,8 @@ export const TailwindTag: FC = ({ ...props }) => (
         <feOffset dy="10" />
         <feGaussianBlur stdDeviation="7.5" />
         <feComposite in2="hardAlpha" operator="out" />
-        <feColorMatrix
-          type="matrix"
-          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0"
-        />
-        <feBlend
-          mode="normal"
-          in2="BackgroundImageFix"
-          result="effect1_dropShadow_2859_5313"
-        />
+        <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0" />
+        <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_2859_5313" />
         <feColorMatrix
           in="SourceAlpha"
           type="matrix"
@@ -789,10 +652,7 @@ export const TailwindTag: FC = ({ ...props }) => (
         <feOffset dy="4" />
         <feGaussianBlur stdDeviation="3" />
         <feComposite in2="hardAlpha" operator="out" />
-        <feColorMatrix
-          type="matrix"
-          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0"
-        />
+        <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0" />
         <feBlend
           mode="normal"
           in2="effect1_dropShadow_2859_5313"
@@ -869,15 +729,8 @@ export const AgnoTag: FC = ({ ...props }) => {
           <feOffset dy="8" />
           <feGaussianBlur stdDeviation="6" />
           <feComposite in2="hardAlpha" operator="out" />
-          <feColorMatrix
-            type="matrix"
-            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.08 0"
-          />
-          <feBlend
-            mode="normal"
-            in2="BackgroundImageFix"
-            result="effect1_dropShadow_2859_5300"
-          />
+          <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.08 0" />
+          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_2859_5300" />
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"
@@ -893,10 +746,7 @@ export const AgnoTag: FC = ({ ...props }) => {
           <feOffset dy="3" />
           <feGaussianBlur stdDeviation="2.5" />
           <feComposite in2="hardAlpha" operator="out" />
-          <feColorMatrix
-            type="matrix"
-            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.08 0"
-          />
+          <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.08 0" />
           <feBlend
             mode="normal"
             in2="effect1_dropShadow_2859_5300"

@@ -4,13 +4,7 @@ import { useQueryState } from "nuqs";
 import Link from "next/link";
 
 const HistoryBlankStateIcon = () => (
-  <svg
-    width="90"
-    height="89"
-    viewBox="0 0 90 89"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
+  <svg width="90" height="89" viewBox="0 0 90 89" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path
       d="M60.0192 18.2484L75.7339 21.2565C80.9549 22.2558 84.3771 27.2984 83.3777 32.5194L80.3697 48.2341C79.3703 53.455 74.3277 56.8773 69.1067 55.8779L53.3921 52.8698C48.1711 51.8704 44.7489 46.8278 45.7482 41.6069L48.7563 25.8922C49.7557 20.6712 54.7983 17.249 60.0192 18.2484Z"
       stroke="white"
@@ -87,8 +81,7 @@ const HistoryBlankStateIcon = () => (
 );
 
 const SessionBlankState = () => {
-  const { selectedEndpoint, isEndpointActive, hasStorage } =
-    usePlaygroundStore();
+  const { selectedEndpoint, isEndpointActive, hasStorage } = usePlaygroundStore();
   const [agentId] = useQueryState("agent");
 
   const errorMessage = (() => {
@@ -103,11 +96,7 @@ const SessionBlankState = () => {
         return (
           <>
             Connect{" "}
-            <Link
-              className="underline"
-              href={"https://docs.agno.com/storage"}
-              target="_blank"
-            >
+            <Link className="underline" href={"https://docs.agno.com/storage"} target="_blank">
               storage
             </Link>{" "}
             to your agent to see sessions.{" "}
@@ -124,9 +113,7 @@ const SessionBlankState = () => {
         <HistoryBlankStateIcon />
         <div className="flex flex-col items-center gap-2">
           <h3 className="text-sm font-medium text-primary">No Session found</h3>
-          <p className="max-w-[210px] text-center text-sm text-muted">
-            {errorMessage}
-          </p>
+          <p className="max-w-[210px] text-center text-sm text-muted">{errorMessage}</p>
         </div>
       </div>
     </div>

@@ -4,29 +4,18 @@ import { toast } from "sonner";
 import { usePlaygroundStore } from "../store";
 
 import { ComboboxAgent, type PlaygroundChatMessage } from "@/types/playground";
-import {
-  getPlaygroundAgentsAPI,
-  getPlaygroundStatusAPI,
-} from "@/api/playground";
+import { getPlaygroundAgentsAPI, getPlaygroundStatusAPI } from "@/api/playground";
 import { useQueryState } from "nuqs";
 
 const useChatActions = () => {
   const { chatInputRef } = usePlaygroundStore();
-  const selectedEndpoint = usePlaygroundStore(
-    (state) => state.selectedEndpoint,
-  );
+  const selectedEndpoint = usePlaygroundStore((state) => state.selectedEndpoint);
   const [, setSessionId] = useQueryState("session");
   const setMessages = usePlaygroundStore((state) => state.setMessages);
-  const setIsEndpointActive = usePlaygroundStore(
-    (state) => state.setIsEndpointActive,
-  );
-  const setIsEndpointLoading = usePlaygroundStore(
-    (state) => state.setIsEndpointLoading,
-  );
+  const setIsEndpointActive = usePlaygroundStore((state) => state.setIsEndpointActive);
+  const setIsEndpointLoading = usePlaygroundStore((state) => state.setIsEndpointLoading);
   const setAgents = usePlaygroundStore((state) => state.setAgents);
-  const setSelectedModel = usePlaygroundStore(
-    (state) => state.setSelectedModel,
-  );
+  const setSelectedModel = usePlaygroundStore((state) => state.setSelectedModel);
   const [agentId, setAgentId] = useQueryState("agent");
 
   const getStatus = useCallback(async () => {
@@ -65,7 +54,7 @@ const useChatActions = () => {
     (message: PlaygroundChatMessage) => {
       setMessages((prevMessages) => [...prevMessages, message]);
     },
-    [setMessages],
+    [setMessages]
   );
 
   const initializePlayground = useCallback(async () => {

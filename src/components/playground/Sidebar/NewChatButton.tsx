@@ -15,8 +15,7 @@ function NewChatButton() {
       disabled={messages.length === 0}
     >
       <div className="flex items-center gap-2">
-        <p>New Chat</p>{" "}
-        <Icon type="plus-icon" size="xs" className="text-background" />
+        <p>New Chat</p> <Icon type="plus-icon" size="xs" className="text-background" />
       </div>
     </Button>
   );

@@ -21,30 +21,22 @@ interface SkeletonListProps {
 const SkeletonList: FC<SkeletonListProps> = ({ skeletonCount }) => {
   const skeletons = useMemo(
     () => Array.from({ length: skeletonCount }, (_, i) => i),
-    [skeletonCount],
+    [skeletonCount]
   );
 
   return skeletons.map((skeleton, index) => (
     <Skeleton
       key={skeleton}
-      className={cn(
-        "mb-1 h-11 rounded-lg px-3 py-2",
-        index > 0 && "bg-background-secondary",
-      )}
+      className={cn("mb-1 h-11 rounded-lg px-3 py-2", index > 0 && "bg-background-secondary")}
     />
   ));
 };
 
 dayjs.extend(utc);
 
-const formatDate = (
-  timestamp: number,
-  format: "natural" | "full" = "full",
-): string => {
+const formatDate = (timestamp: number, format: "natural" | "full" = "full"): string => {
   const date = dayjs.unix(timestamp).utc();
-  return format === "natural"
-    ? date.format("HH:mm")
-    : date.format("YYYY-MM-DD HH:mm:ss");
+  return format === "natural" ? date.format("HH:mm") : date.format("YYYY-MM-DD HH:mm:ss");
 };
 
 const Sessions = () => {
@@ -63,9 +55,7 @@ const Sessions = () => {
     setSessionsData,
   } = usePlaygroundStore();
   const [isScrolling, setIsScrolling] = useState(false);
-  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
-    null,
-  );
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const { getSession, getSessions } = useSessionLoader();
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
   const { isSessionsLoading } = usePlaygroundStore();
@@ -108,14 +98,7 @@ const Sessions = () => {
       setSessionsData(() => null);
       getSessions(agentId);
     }
-  }, [
-    selectedEndpoint,
-    agentId,
-    getSessions,
-    isEndpointLoading,
-    hasStorage,
-    setSessionsData,
-  ]);
+  }, [selectedEndpoint, agentId, getSessions, isEndpointLoading, hasStorage, setSessionsData]);
 
   useEffect(() => {
     if (sessionId) {
@@ -133,17 +116,12 @@ const Sessions = () => {
     }));
   }, [sessionsData]);
 
-  const handleSessionClick = useCallback(
-    (id: string) => () => setSelectedSessionId(id),
-    [],
-  );
+  const handleSessionClick = useCallback((id: string) => () => setSelectedSessionId(id), []);
 
   if (isSessionsLoading || isEndpointLoading)
     return (
       <div className="w-full">
-        <div className="mb-2 text-xs font-medium uppercase text-gray-700">
-          Sessions
-        </div>
+        <div className="mb-2 text-xs font-medium uppercase text-gray-700">Sessions</div>
         <div className="mt-4 h-[calc(100vh-325px)] w-full overflow-y-auto">
           <SkeletonList skeletonCount={5} />
         </div>
@@ -151,9 +129,7 @@ const Sessions = () => {
     );
   return (
     <div className="w-full">
-      <div className="mb-2 w-full text-xs font-medium uppercase text-gray-700">
-        Sessions
-      </div>
+      <div className="mb-2 w-full text-xs font-medium uppercase text-gray-700">Sessions</div>
       <div
         className={`h-[calc(100vh-345px)] overflow-y-auto font-geist transition-all duration-300 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar]:transition-opacity [&::-webkit-scrollbar]:duration-300 ${isScrolling ? "[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-background [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:opacity-0" : "[&::-webkit-scrollbar]:opacity-100"}`}
         onScroll={handleScroll}

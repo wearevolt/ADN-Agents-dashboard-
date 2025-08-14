@@ -41,10 +41,7 @@ const ReferenceItem: FC<ReferenceItemProps> = ({ reference }) => (
 const References: FC<ReferenceProps> = ({ references }) => (
   <div className="flex flex-col gap-4">
     {references.map((referenceData, index) => (
-      <div
-        key={`${referenceData.query}-${index}`}
-        className="flex flex-col gap-3"
-      >
+      <div key={`${referenceData.query}-${index}`} className="flex flex-col gap-3">
         <div className="flex flex-wrap gap-3">
           {referenceData.references.map((reference, refIndex) => (
             <ReferenceItem
@@ -61,37 +58,35 @@ const References: FC<ReferenceProps> = ({ references }) => (
 const AgentMessageWrapper = ({ message }: MessageWrapperProps) => {
   return (
     <div className="flex flex-col gap-y-9">
-      {message.extra_data?.reasoning_steps &&
-        message.extra_data.reasoning_steps.length > 0 && (
-          <div className="flex items-start gap-4">
-            <Tooltip
-              delayDuration={0}
-              content={<p className="text-gray-700">Reasoning</p>}
-              side="top"
-            >
-              <Icon type="reasoning" size="sm" />
-            </Tooltip>
-            <div className="flex flex-col gap-3">
-              <p className="text-xs uppercase">Reasoning</p>
-              <Reasonings reasoning={message.extra_data.reasoning_steps} />
-            </div>
+      {message.extra_data?.reasoning_steps && message.extra_data.reasoning_steps.length > 0 && (
+        <div className="flex items-start gap-4">
+          <Tooltip
+            delayDuration={0}
+            content={<p className="text-gray-700">Reasoning</p>}
+            side="top"
+          >
+            <Icon type="reasoning" size="sm" />
+          </Tooltip>
+          <div className="flex flex-col gap-3">
+            <p className="text-xs uppercase">Reasoning</p>
+            <Reasonings reasoning={message.extra_data.reasoning_steps} />
           </div>
-        )}
-      {message.extra_data?.references &&
-        message.extra_data.references.length > 0 && (
-          <div className="flex items-start gap-4">
-            <Tooltip
-              delayDuration={0}
-              content={<p className="text-gray-700">References</p>}
-              side="top"
-            >
-              <Icon type="references" size="sm" />
-            </Tooltip>
-            <div className="flex flex-col gap-3">
-              <References references={message.extra_data.references} />
-            </div>
+        </div>
+      )}
+      {message.extra_data?.references && message.extra_data.references.length > 0 && (
+        <div className="flex items-start gap-4">
+          <Tooltip
+            delayDuration={0}
+            content={<p className="text-gray-700">References</p>}
+            side="top"
+          >
+            <Icon type="references" size="sm" />
+          </Tooltip>
+          <div className="flex flex-col gap-3">
+            <References references={message.extra_data.references} />
           </div>
-        )}
+        </div>
+      )}
       {message.tool_calls && message.tool_calls.length > 0 && (
         <div className="flex items-start gap-3">
           <Tooltip
@@ -111,8 +106,7 @@ const AgentMessageWrapper = ({ message }: MessageWrapperProps) => {
             {message.tool_calls.map((toolCall, index) => (
               <ToolComponent
                 key={
-                  toolCall.tool_call_id ||
-                  `${toolCall.tool_name}-${toolCall.created_at}-${index}`
+                  toolCall.tool_call_id || `${toolCall.tool_name}-${toolCall.created_at}-${index}`
                 }
                 tools={toolCall}
               />
@@ -162,13 +156,7 @@ const Messages = ({ messages }: MessageListProps) => {
         const isLastMessage = index === messages.length - 1;
 
         if (message.role === "agent") {
-          return (
-            <AgentMessageWrapper
-              key={key}
-              message={message}
-              isLastMessage={isLastMessage}
-            />
-          );
+          return <AgentMessageWrapper key={key} message={message} isLastMessage={isLastMessage} />;
         }
         return <UserMessage key={key} message={message} />;
       })}

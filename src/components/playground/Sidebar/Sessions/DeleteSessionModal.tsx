@@ -28,8 +28,7 @@ const DeleteSessionModal: FC<DeleteSessionModalProps> = ({
       <DialogHeader>
         <DialogTitle>Confirm deletion</DialogTitle>
         <DialogDescription>
-          This will permanently delete the session. This action cannot be
-          undone.
+          This will permanently delete the session. This action cannot be undone.
         </DialogDescription>
       </DialogHeader>
       <DialogFooter>

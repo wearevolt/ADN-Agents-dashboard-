@@ -1,13 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -46,12 +40,8 @@ export default function ConfirmationModal({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <Card className="w-full max-w-md mx-4 bg-white border border-gray-200 shadow-lg">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900">
-            {title}
-          </CardTitle>
-          <CardDescription className="text-gray-600">
-            {description}
-          </CardDescription>
+          <CardTitle className="text-lg font-semibold text-gray-900">{title}</CardTitle>
+          <CardDescription className="text-gray-600">{description}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex justify-end space-x-3">

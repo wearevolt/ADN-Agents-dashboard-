@@ -4,11 +4,7 @@ import { APIRoutes } from "@/api/routes";
 
 import useChatActions from "@/hooks/useChatActions";
 import { usePlaygroundStore } from "../store";
-import {
-  RunEvent,
-  RunResponseContent,
-  type RunResponse,
-} from "@/types/playground";
+import { RunEvent, RunResponseContent, type RunResponse } from "@/types/playground";
 import { constructEndpointUrl } from "@/lib/constructEndpointUrl";
 import useAIResponseStream from "./useAIResponseStream";
 import { ToolCall } from "@/types/playground";
@@ -24,12 +20,8 @@ const useAIChatStreamHandler = () => {
   const { addMessage, focusChatInput } = useChatActions();
   const [agentId] = useQueryState("agent");
   const [sessionId, setSessionId] = useQueryState("session");
-  const selectedEndpoint = usePlaygroundStore(
-    (state) => state.selectedEndpoint,
-  );
-  const setStreamingErrorMessage = usePlaygroundStore(
-    (state) => state.setStreamingErrorMessage,
-  );
+  const selectedEndpoint = usePlaygroundStore((state) => state.selectedEndpoint);
+  const setStreamingErrorMessage = usePlaygroundStore((state) => state.setStreamingErrorMessage);
   const setIsStreaming = usePlaygroundStore((state) => state.setIsStreaming);
   const setSessionsData = usePlaygroundStore((state) => state.setSessionsData);
   const hasStorage = usePlaygroundStore((state) => state.hasStorage);
@@ -52,32 +44,28 @@ const useAIChatStreamHandler = () => {
    * @param prevToolCalls - The previous tool calls array
    * @returns Updated tool calls array
    */
-  const processToolCall = useCallback(
-    (toolCall: ToolCall, prevToolCalls: ToolCall[] = []) => {
-      const toolCallId =
-        toolCall.tool_call_id || `${toolCall.tool_name}-${toolCall.created_at}`;
+  const processToolCall = useCallback((toolCall: ToolCall, prevToolCalls: ToolCall[] = []) => {
+    const toolCallId = toolCall.tool_call_id || `${toolCall.tool_name}-${toolCall.created_at}`;
 
-      const existingToolCallIndex = prevToolCalls.findIndex(
-        (tc) =>
-          (tc.tool_call_id && tc.tool_call_id === toolCall.tool_call_id) ||
-          (!tc.tool_call_id &&
-            toolCall.tool_name &&
-            toolCall.created_at &&
-            `${tc.tool_name}-${tc.created_at}` === toolCallId),
-      );
-      if (existingToolCallIndex >= 0) {
-        const updatedToolCalls = [...prevToolCalls];
-        updatedToolCalls[existingToolCallIndex] = {
-          ...updatedToolCalls[existingToolCallIndex],
-          ...toolCall,
-        };
-        return updatedToolCalls;
-      } else {
-        return [...prevToolCalls, toolCall];
-      }
-    },
-    [],
-  );
+    const existingToolCallIndex = prevToolCalls.findIndex(
+      (tc) =>
+        (tc.tool_call_id && tc.tool_call_id === toolCall.tool_call_id) ||
+        (!tc.tool_call_id &&
+          toolCall.tool_name &&
+          toolCall.created_at &&
+          `${tc.tool_name}-${tc.created_at}` === toolCallId)
+    );
+    if (existingToolCallIndex >= 0) {
+      const updatedToolCalls = [...prevToolCalls];
+      updatedToolCalls[existingToolCallIndex] = {
+        ...updatedToolCalls[existingToolCallIndex],
+        ...toolCall,
+      };
+      return updatedToolCalls;
+    } else {
+      return [...prevToolCalls, toolCall];
+    }
+  }, []);
 
   /**
    * Processes tool calls from a chunk, handling both single tool object and tools array formats
@@ -86,10 +74,7 @@ const useAIChatStreamHandler = () => {
    * @returns Updated tool calls array
    */
   const processChunkToolCalls = useCallback(
-    (
-      chunk: RunResponseContent | RunResponse,
-      existingToolCalls: ToolCall[] = [],
-    ) => {
+    (chunk: RunResponseContent | RunResponse, existingToolCalls: ToolCall[] = []) => {
       let updatedToolCalls = [...existingToolCalls];
       // Handle new single tool object format
       if (chunk.tool) {
@@ -104,7 +89,7 @@ const useAIChatStreamHandler = () => {
 
       return updatedToolCalls;
     },
-    [processToolCall],
+    [processToolCall]
   );
 
   const handleStreamResponse = useCallback(
@@ -151,10 +136,7 @@ const useAIChatStreamHandler = () => {
         const endpointUrl = constructEndpointUrl(selectedEndpoint);
 
         if (!agentId) return;
-        const playgroundRunUrl = APIRoutes.AgentRun(endpointUrl).replace(
-          "{agent_id}",
-          agentId,
-        );
+        const playgroundRunUrl = APIRoutes.AgentRun(endpointUrl).replace("{agent_id}", agentId);
 
         formData.append("stream", "true");
         formData.append("session_id", sessionId ?? "");
@@ -163,10 +145,7 @@ const useAIChatStreamHandler = () => {
           apiUrl: playgroundRunUrl,
           requestBody: formData,
           onChunk: (chunk: RunResponse) => {
-            if (
-              chunk.event === RunEvent.RunStarted ||
-              chunk.event === RunEvent.ReasoningStarted
-            ) {
+            if (chunk.event === RunEvent.RunStarted || chunk.event === RunEvent.ReasoningStarted) {
               newSessionId = chunk.session_id as string;
               setSessionId(chunk.session_id as string);
               if (
@@ -181,7 +160,7 @@ const useAIChatStreamHandler = () => {
                 };
                 setSessionsData((prevSessionsData) => {
                   const sessionExists = prevSessionsData?.some(
-                    (session) => session.session_id === chunk.session_id,
+                    (session) => session.session_id === chunk.session_id
                   );
                   if (sessionExists) {
                     return prevSessionsData;
@@ -194,10 +173,7 @@ const useAIChatStreamHandler = () => {
                 const newMessages = [...prevMessages];
                 const lastMessage = newMessages[newMessages.length - 1];
                 if (lastMessage && lastMessage.role === "agent") {
-                  lastMessage.tool_calls = processChunkToolCalls(
-                    chunk,
-                    lastMessage.tool_calls,
-                  );
+                  lastMessage.tool_calls = processChunkToolCalls(chunk, lastMessage.tool_calls);
                 }
                 return newMessages;
               });
@@ -218,10 +194,7 @@ const useAIChatStreamHandler = () => {
                   lastContent = chunk.content;
 
                   // Handle tool calls streaming
-                  lastMessage.tool_calls = processChunkToolCalls(
-                    chunk,
-                    lastMessage.tool_calls,
-                  );
+                  lastMessage.tool_calls = processChunkToolCalls(chunk, lastMessage.tool_calls);
                   if (chunk.extra_data?.reasoning_steps) {
                     lastMessage.extra_data = {
                       ...lastMessage.extra_data,
@@ -236,8 +209,7 @@ const useAIChatStreamHandler = () => {
                     };
                   }
 
-                  lastMessage.created_at =
-                    chunk.created_at ?? lastMessage.created_at;
+                  lastMessage.created_at = chunk.created_at ?? lastMessage.created_at;
                   if (chunk.images) {
                     lastMessage.images = chunk.images;
                   }
@@ -264,8 +236,7 @@ const useAIChatStreamHandler = () => {
                   const transcript = chunk.response_audio.transcript;
                   lastMessage.response_audio = {
                     ...lastMessage.response_audio,
-                    transcript:
-                      lastMessage.response_audio?.transcript + transcript,
+                    transcript: lastMessage.response_audio?.transcript + transcript,
                   };
                 }
                 return newMessages;
@@ -291,18 +262,14 @@ const useAIChatStreamHandler = () => {
               if (hasStorage && newSessionId) {
                 setSessionsData(
                   (prevSessionsData) =>
-                    prevSessionsData?.filter(
-                      (session) => session.session_id !== newSessionId,
-                    ) ?? null,
+                    prevSessionsData?.filter((session) => session.session_id !== newSessionId) ??
+                    null
                 );
               }
             } else if (chunk.event === RunEvent.RunCompleted) {
               setMessages((prevMessages) => {
                 const newMessages = prevMessages.map((message, index) => {
-                  if (
-                    index === prevMessages.length - 1 &&
-                    message.role === "agent"
-                  ) {
+                  if (index === prevMessages.length - 1 && message.role === "agent") {
                     let updatedContent: string;
                     if (typeof chunk.content === "string") {
                       updatedContent = chunk.content;
@@ -316,21 +283,15 @@ const useAIChatStreamHandler = () => {
                     return {
                       ...message,
                       content: updatedContent,
-                      tool_calls: processChunkToolCalls(
-                        chunk,
-                        message.tool_calls,
-                      ),
+                      tool_calls: processChunkToolCalls(chunk, message.tool_calls),
                       images: chunk.images ?? message.images,
                       videos: chunk.videos ?? message.videos,
                       response_audio: chunk.response_audio,
                       created_at: chunk.created_at ?? message.created_at,
                       extra_data: {
                         reasoning_steps:
-                          chunk.extra_data?.reasoning_steps ??
-                          message.extra_data?.reasoning_steps,
-                        references:
-                          chunk.extra_data?.references ??
-                          message.extra_data?.references,
+                          chunk.extra_data?.reasoning_steps ?? message.extra_data?.reasoning_steps,
+                        references: chunk.extra_data?.references ?? message.extra_data?.references,
                       },
                     };
                   }
@@ -346,9 +307,7 @@ const useAIChatStreamHandler = () => {
             if (hasStorage && newSessionId) {
               setSessionsData(
                 (prevSessionsData) =>
-                  prevSessionsData?.filter(
-                    (session) => session.session_id !== newSessionId,
-                  ) ?? null,
+                  prevSessionsData?.filter((session) => session.session_id !== newSessionId) ?? null
               );
             }
           },
@@ -356,15 +315,11 @@ const useAIChatStreamHandler = () => {
         });
       } catch (error) {
         updateMessagesWithErrorState();
-        setStreamingErrorMessage(
-          error instanceof Error ? error.message : String(error),
-        );
+        setStreamingErrorMessage(error instanceof Error ? error.message : String(error));
         if (hasStorage && newSessionId) {
           setSessionsData(
             (prevSessionsData) =>
-              prevSessionsData?.filter(
-                (session) => session.session_id !== newSessionId,
-              ) ?? null,
+              prevSessionsData?.filter((session) => session.session_id !== newSessionId) ?? null
           );
         }
       } finally {
@@ -387,7 +342,7 @@ const useAIChatStreamHandler = () => {
       setSessionId,
       hasStorage,
       processChunkToolCalls,
-    ],
+    ]
   );
 
   return { handleStreamResponse };

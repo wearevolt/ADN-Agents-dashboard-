@@ -22,10 +22,7 @@ const TextArea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 
       textarea.style.height = `${MIN_HEIGHT}px`;
       const { scrollHeight } = textarea;
-      const newHeight = Math.min(
-        Math.max(scrollHeight, MIN_HEIGHT),
-        MAX_HEIGHT,
-      );
+      const newHeight = Math.min(Math.max(scrollHeight, MIN_HEIGHT), MAX_HEIGHT);
       textarea.style.height = `${newHeight}px`;
       setShowScroll(scrollHeight > MAX_HEIGHT);
     }, []);
@@ -37,14 +34,11 @@ const TextArea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         requestAnimationFrame(() => {
           adjustHeight();
           if (textareaRef.current) {
-            textareaRef.current.setSelectionRange(
-              cursorPosition,
-              cursorPosition,
-            );
+            textareaRef.current.setSelectionRange(cursorPosition, cursorPosition);
           }
         });
       },
-      [onChange, adjustHeight],
+      [onChange, adjustHeight]
     );
 
     const handleRef = React.useCallback(
@@ -62,7 +56,7 @@ const TextArea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 
         textareaRef.current = node;
       },
-      [forwardedRef],
+      [forwardedRef]
     );
 
     React.useEffect(() => {
@@ -82,7 +76,7 @@ const TextArea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           "focus-visible:ring-0.5 focus-visible:ring-ring focus-visible:border-primary/50 focus-visible:outline-none",
           "disabled:cursor-not-allowed disabled:opacity-50",
           showScroll ? "overflow-y-auto" : "overflow-hidden",
-          className,
+          className
         )}
         style={{
           minHeight: `${MIN_HEIGHT}px`,
@@ -95,7 +89,7 @@ const TextArea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         {...props}
       />
     );
-  },
+  }
 );
 
 TextArea.displayName = "TextArea";

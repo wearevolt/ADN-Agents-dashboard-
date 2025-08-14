@@ -5,15 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  Paperclip,
-  Send,
-  ArrowUpRight,
-  Plus,
-  Maximize2,
-  Check,
-  X,
-} from "lucide-react";
+import { Paperclip, Send, ArrowUpRight, Plus, Maximize2, Check, X } from "lucide-react";
 import { AddAgentModal } from "./AddAgentModal";
 import { AgentContextMenu } from "./AgentContextMenu";
 import { AgentInfoModal } from "./AgentInfoModal";
@@ -274,8 +266,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
   const [activeTab, setActiveTab] = useState("My agents");
   const [inputValue, setInputValue] = useState("");
   const [agents, setAgents] = useState<Agent[]>(initialAgents);
-  const [libraryAgents, setLibraryAgents] =
-    useState<LibraryAgent[]>(initialLibraryAgents);
+  const [libraryAgents, setLibraryAgents] = useState<LibraryAgent[]>(initialLibraryAgents);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingAgent, setEditingAgent] = useState<Agent | null>(null);
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
@@ -408,16 +399,11 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
     if (isAdded) {
       // Remove from agents and addedAgents
       setAgents(
-        agents.filter(
-          (agent) =>
-            !(agent.name === libraryAgent.name && agent.type === "personal"),
-        ),
+        agents.filter((agent) => !(agent.name === libraryAgent.name && agent.type === "personal"))
       );
       setAddedAgents((prev) => ({
         ...prev,
-        personal: new Set(
-          Array.from(prev.personal).filter((id) => id !== libraryAgent.id),
-        ),
+        personal: new Set(Array.from(prev.personal).filter((id) => id !== libraryAgent.id)),
       }));
     } else {
       // Add to agents and addedAgents
@@ -441,7 +427,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
 
   const handleLibraryAgentAction = (
     libraryAgent: LibraryAgent,
-    action: "personal" | "remove-personal",
+    action: "personal" | "remove-personal"
   ) => {
     switch (action) {
       case "personal":
@@ -479,7 +465,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
       description: string;
       isPrivate: boolean;
       tags: AgentTag[];
-    },
+    }
   ) => {
     const currentAgent = agents.find((a) => a.id === agentId);
     if (!currentAgent) return;
@@ -498,16 +484,14 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
               isLibraryAgent: !updatedAgent.isPrivate,
               tags: updatedAgent.tags,
             }
-          : agent,
-      ),
+          : agent
+      )
     );
 
     // Управление библиотечными агентами
     if (!updatedAgent.isPrivate) {
       // Если агент стал не приватным, добавляем/обновляем в библиотеке
-      const existingLibraryAgent = libraryAgents.find(
-        (lib) => lib.name === updatedAgent.name,
-      );
+      const existingLibraryAgent = libraryAgents.find((lib) => lib.name === updatedAgent.name);
       if (existingLibraryAgent) {
         // Обновляем существующего библиотечного агента
         setLibraryAgents(
@@ -518,8 +502,8 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
                   description: updatedAgent.description,
                   tags: updatedAgent.tags,
                 }
-              : lib,
-          ),
+              : lib
+          )
         );
       } else {
         // Создаем нового библиотечного агента
@@ -538,9 +522,8 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
       // Если агент стал приватным, удаляем из библиотеки (если он там был)
       setLibraryAgents(
         libraryAgents.filter(
-          (lib) =>
-            lib.name !== updatedAgent.name || !lib.id.startsWith("custom-"),
-        ),
+          (lib) => lib.name !== updatedAgent.name || !lib.id.startsWith("custom-")
+        )
       );
     }
 
@@ -566,9 +549,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
       if (libraryAgent) {
         setAddedAgents((prev) => ({
           ...prev,
-          personal: new Set(
-            Array.from(prev.personal).filter((id) => id !== libraryAgent.id),
-          ),
+          personal: new Set(Array.from(prev.personal).filter((id) => id !== libraryAgent.id)),
         }));
       }
 
@@ -593,9 +574,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
       if (libraryAgent) {
         setAddedAgents((prev) => ({
           ...prev,
-          personal: new Set(
-            Array.from(prev.personal).filter((id) => id !== libraryAgent.id),
-          ),
+          personal: new Set(Array.from(prev.personal).filter((id) => id !== libraryAgent.id)),
         }));
       }
     }
@@ -628,15 +607,11 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
     if (deletedAgent) {
       // Если это библиотечный агент, удаляем из addedAgents
       if (!deletedAgent.isCustom) {
-        const libraryAgent = libraryAgents.find(
-          (lib) => lib.name === deletedAgent.name,
-        );
+        const libraryAgent = libraryAgents.find((lib) => lib.name === deletedAgent.name);
         if (libraryAgent) {
           setAddedAgents((prev) => ({
             ...prev,
-            personal: new Set(
-              Array.from(prev.personal).filter((id) => id !== libraryAgent.id),
-            ),
+            personal: new Set(Array.from(prev.personal).filter((id) => id !== libraryAgent.id)),
           }));
         }
       } else {
@@ -644,9 +619,8 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
         if (deletedAgent.isLibraryAgent) {
           setLibraryAgents(
             libraryAgents.filter(
-              (lib) =>
-                lib.name !== deletedAgent.name || !lib.id.startsWith("custom-"),
-            ),
+              (lib) => lib.name !== deletedAgent.name || !lib.id.startsWith("custom-")
+            )
           );
         }
       }
@@ -684,10 +658,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
             fill="currentColor"
             viewBox="0 0 256 256"
           >
-            <path
-              d="M192,96a64,64,0,1,1-64-64A64,64,0,0,1,192,96Z"
-              opacity="0.2"
-            ></path>
+            <path d="M192,96a64,64,0,1,1-64-64A64,64,0,0,1,192,96Z" opacity="0.2"></path>
             <path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"></path>
           </svg>
         );
@@ -724,7 +695,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
   // Функции для управления фильтром по тегам
   const handleTagFilterToggle = (tag: AgentTag) => {
     setSelectedTagsFilter((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
   };
 
@@ -746,7 +717,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
       acc[agent.category].push(agent);
       return acc;
     },
-    {} as Record<string, LibraryAgent[]>,
+    {} as Record<string, LibraryAgent[]>
   );
 
   const renderLibraryView = () => {
@@ -755,9 +726,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
         {/* Фильтр по тегам */}
         <div className="bg-white py-4 pr-4 rounded-lg">
           <div className="flex items-center gap-4">
-            <h3 className="text-sm font-medium text-gray-900">
-              Filter by tags
-            </h3>
+            <h3 className="text-sm font-medium text-gray-900">Filter by tags</h3>
 
             <div className="flex flex-wrap gap-2">
               {AVAILABLE_TAGS.map((tag) => (
@@ -800,9 +769,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
         {/* Проверка на пустые результаты */}
         {Object.keys(groupedLibraryAgents).length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-gray-500 mb-2">
-              No agents found with selected tags
-            </div>
+            <div className="text-gray-500 mb-2">No agents found with selected tags</div>
           </div>
         ) : (
           Object.entries(groupedLibraryAgents).map(([category, agents]) => (
@@ -825,9 +792,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
                             className="font-semibold text-gray-900 mb-2 flex items-center gap-2"
                             style={{ fontSize: "14px" }}
                           >
-                            <span style={{ fontSize: "14px" }}>
-                              {agent.emoji}
-                            </span>
+                            <span style={{ fontSize: "14px" }}>{agent.emoji}</span>
                             {agent.name}
                           </h3>
                           <p
@@ -857,10 +822,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
                                 style={{ fontSize: "14px" }}
                               >
                                 Open
-                                <ArrowUpRight
-                                  className="h-3 w-3"
-                                  style={{ marginLeft: "4px" }}
-                                />
+                                <ArrowUpRight className="h-3 w-3" style={{ marginLeft: "4px" }} />
                               </Button>
 
                               {/* My Agents Button - скрываем для агентов, созданных текущим пользователем */}
@@ -872,9 +834,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
                                     e.stopPropagation();
                                     handleLibraryAgentAction(
                                       agent,
-                                      isAddedToPersonal
-                                        ? "remove-personal"
-                                        : "personal",
+                                      isAddedToPersonal ? "remove-personal" : "personal"
                                     );
                                   }}
                                   className={`text-gray-700 border-gray-300 hover:bg-gray-50 ${isAddedToPersonal ? "bg-green-50 border-green-300" : "bg-white"}`}
@@ -890,10 +850,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
                                     </>
                                   ) : (
                                     <>
-                                      <Plus
-                                        className="h-3 w-3"
-                                        style={{ marginRight: "4px" }}
-                                      />
+                                      <Plus className="h-3 w-3" style={{ marginRight: "4px" }} />
                                       My Agents
                                     </>
                                   )}
@@ -902,12 +859,8 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
                             </div>
 
                             <div className="text-right">
-                              <p className="text-xs text-gray-500">
-                                Created by
-                              </p>
-                              <p className="text-xs text-gray-700 font-medium">
-                                {agent.createdBy}
-                              </p>
+                              <p className="text-xs text-gray-500">Created by</p>
+                              <p className="text-xs text-gray-700 font-medium">{agent.createdBy}</p>
                             </div>
                           </div>
                         </div>
@@ -933,16 +886,13 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
         },
       };
 
-      const config =
-        emptyStateConfig[activeTab as keyof typeof emptyStateConfig];
+      const config = emptyStateConfig[activeTab as keyof typeof emptyStateConfig];
 
       return (
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col items-center justify-center py-16">
             <div className="text-center">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                {config.title}
-              </h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">{config.title}</h3>
               <p className="text-gray-600 mb-6">{config.description}</p>
               <Button
                 onClick={() => setActiveTab("Team Library")}
@@ -968,9 +918,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
-                    <span className="text-sm font-semibold text-gray-900">
-                      {agent.name}
-                    </span>
+                    <span className="text-sm font-semibold text-gray-900">{agent.name}</span>
                   </div>
                   <div className="absolute top-3 right-3">
                     <AgentContextMenu
@@ -999,10 +947,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
                   ) : agent.items && agent.items.length > 0 ? (
                     <ul className="space-y-2 max-h-20 overflow-hidden">
                       {agent.items.slice(0, 3).map((item, index) => (
-                        <li
-                          key={index}
-                          className="text-sm text-gray-700 flex items-start"
-                        >
+                        <li key={index} className="text-sm text-gray-700 flex items-start">
                           <span className="w-1 h-1 bg-gray-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
                           <span className="line-clamp-1">{item}</span>
                         </li>
@@ -1016,11 +961,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
                 </div>
 
                 {/* Tags */}
-                <TagsList
-                  tags={agent.tags || []}
-                  maxVisibleTags={3}
-                  className="mt-2"
-                />
+                <TagsList tags={agent.tags || []} maxVisibleTags={3} className="mt-2" />
 
                 <div
                   className={`absolute bottom-4 left-6 right-6 flex items-center ${agent.status === "error" ? "justify-end" : "justify-between"}`}
@@ -1139,12 +1080,8 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
         {activeTab === "My agents" && (
           <div className="max-w-4xl mx-auto mb-8">
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-                Hi Alex 👋
-              </h2>
-              <p className="text-gray-600">
-                Start a conversation with your AI agents
-              </p>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Hi Alex 👋</h2>
+              <p className="text-gray-600">Start a conversation with your AI agents</p>
             </div>
 
             <div className="relative bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
@@ -1168,11 +1105,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
 
               <div className="flex items-center justify-between p-3 border-t border-gray-100">
                 <div className="flex items-center space-x-3">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-8 w-8 p-0 hover:bg-gray-100"
-                  >
+                  <Button size="sm" variant="ghost" className="h-8 w-8 p-0 hover:bg-gray-100">
                     <Paperclip className="h-4 w-4 text-gray-600" />
                   </Button>
                 </div>
@@ -1191,9 +1124,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
         )}
 
         {/* Content based on active tab */}
-        {activeTab === "Team Library"
-          ? renderLibraryView()
-          : renderAgentsGrid()}
+        {activeTab === "Team Library" ? renderLibraryView() : renderAgentsGrid()}
       </main>
 
       {/* Add Agent Modal */}

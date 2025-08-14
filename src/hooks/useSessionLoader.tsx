@@ -1,16 +1,8 @@
 import { useCallback } from "react";
-import {
-  getPlaygroundSessionAPI,
-  getAllPlaygroundSessionsAPI,
-} from "@/api/playground";
+import { getPlaygroundSessionAPI, getAllPlaygroundSessionsAPI } from "@/api/playground";
 import { usePlaygroundStore } from "../store";
 import { toast } from "sonner";
-import {
-  PlaygroundChatMessage,
-  ToolCall,
-  ReasoningMessage,
-  ChatEntry,
-} from "@/types/playground";
+import { PlaygroundChatMessage, ToolCall, ReasoningMessage, ChatEntry } from "@/types/playground";
 import { getJsonMarkdown } from "@/lib/utils";
 
 interface SessionResponse {
@@ -27,12 +19,8 @@ interface SessionResponse {
 
 const useSessionLoader = () => {
   const setMessages = usePlaygroundStore((state) => state.setMessages);
-  const selectedEndpoint = usePlaygroundStore(
-    (state) => state.selectedEndpoint,
-  );
-  const setIsSessionsLoading = usePlaygroundStore(
-    (state) => state.setIsSessionsLoading,
-  );
+  const selectedEndpoint = usePlaygroundStore((state) => state.selectedEndpoint);
+  const setIsSessionsLoading = usePlaygroundStore((state) => state.setIsSessionsLoading);
   const setSessionsData = usePlaygroundStore((state) => state.setSessionsData);
 
   const getSessions = useCallback(
@@ -40,10 +28,7 @@ const useSessionLoader = () => {
       if (!agentId || !selectedEndpoint) return;
       try {
         setIsSessionsLoading(true);
-        const sessions = await getAllPlaygroundSessionsAPI(
-          selectedEndpoint,
-          agentId,
-        );
+        const sessions = await getAllPlaygroundSessionsAPI(selectedEndpoint, agentId);
         setSessionsData(sessions);
       } catch {
         toast.error("Error loading sessions");
@@ -51,7 +36,7 @@ const useSessionLoader = () => {
         setIsSessionsLoading(false);
       }
     },
-    [selectedEndpoint, setSessionsData, setIsSessionsLoading],
+    [selectedEndpoint, setSessionsData, setIsSessionsLoading]
   );
 
   const getSession = useCallback(
@@ -64,13 +49,11 @@ const useSessionLoader = () => {
         const response = (await getPlaygroundSessionAPI(
           selectedEndpoint,
           agentId,
-          sessionId,
+          sessionId
         )) as SessionResponse;
 
         if (response && response.memory) {
-          const sessionHistory = response.runs
-            ? response.runs
-            : response.memory.runs;
+          const sessionHistory = response.runs ? response.runs : response.memory.runs;
 
           if (sessionHistory && Array.isArray(sessionHistory)) {
             const messagesForPlayground = sessionHistory.flatMap((run) => {
@@ -98,13 +81,12 @@ const useSessionLoader = () => {
                           tool_args: msg.tool_args ?? {},
                           tool_call_error: msg.tool_call_error ?? false,
                           metrics: msg.metrics ?? { time: 0 },
-                          created_at:
-                            msg.created_at ?? Math.floor(Date.now() / 1000),
+                          created_at: msg.created_at ?? Math.floor(Date.now() / 1000),
                         });
                       }
                       return acc;
                     },
-                    [],
+                    []
                   ),
                 ];
 
@@ -143,7 +125,7 @@ const useSessionLoader = () => {
                   };
                 }
                 return message;
-              },
+              }
             );
 
             setMessages(processedMessages);
@@ -154,7 +136,7 @@ const useSessionLoader = () => {
         return null;
       }
     },
-    [selectedEndpoint, setMessages],
+    [selectedEndpoint, setMessages]
   );
 
   return { getSession, getSessions };

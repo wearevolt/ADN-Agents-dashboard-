@@ -1,9 +1,7 @@
 // Agno API Configuration
 export const AGNO_CONFIG = {
   API_KEY: process.env.NEXT_PUBLIC_AGNO_API_KEY || "",
-  API_URL: (
-    process.env.NEXT_PUBLIC_AGNO_API_URL || "http://localhost:7777"
-  ).replace(/\/$/, ""),
+  API_URL: (process.env.NEXT_PUBLIC_AGNO_API_URL || "http://localhost:7777").replace(/\/$/, ""),
   ENABLED: (process.env.NEXT_PUBLIC_AGNO_ENABLED ?? "true") === "true",
 };
 

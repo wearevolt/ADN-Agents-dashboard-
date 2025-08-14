@@ -25,9 +25,7 @@ const ChatModalInput = () => {
       await handleStreamResponse(currentMessage);
     } catch (error) {
       toast.error(
-        `Error in handleSubmit: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
+        `Error in handleSubmit: ${error instanceof Error ? error.message : String(error)}`
       );
     }
   };
@@ -39,12 +37,7 @@ const ChatModalInput = () => {
         value={inputMessage}
         onChange={(e) => setInputMessage(e.target.value)}
         onKeyDown={(e) => {
-          if (
-            e.key === "Enter" &&
-            !e.nativeEvent.isComposing &&
-            !e.shiftKey &&
-            !isStreaming
-          ) {
+          if (e.key === "Enter" && !e.nativeEvent.isComposing && !e.shiftKey && !isStreaming) {
             e.preventDefault();
             handleSubmit();
           }

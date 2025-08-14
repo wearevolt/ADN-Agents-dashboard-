@@ -46,7 +46,7 @@ interface AddAgentModalProps {
       description: string;
       isPrivate: boolean;
       tags: AgentTag[];
-    },
+    }
   ) => void;
   editingAgent?: Agent | null;
 }
@@ -79,18 +79,14 @@ export const AddAgentModal = ({
     if (isOpen) {
       if (editingAgent) {
         // Определяем private status - если агент не находится в библиотеке команды, то он приватный
-        const isAgentPrivate =
-          editingAgent.type === "personal" && !editingAgent.isLibraryAgent;
+        const isAgentPrivate = editingAgent.type === "personal" && !editingAgent.isLibraryAgent;
         setIsPrivate(isAgentPrivate);
         setSelectedTags(editingAgent.tags || []);
         setFormData({
-          name: editingAgent.name.startsWith("@")
-            ? editingAgent.name.slice(1)
-            : editingAgent.name,
+          name: editingAgent.name.startsWith("@") ? editingAgent.name.slice(1) : editingAgent.name,
           apiKey: editingAgent.apiKey || "", // Keep existing API key
           agentUrl: editingAgent.agentUrl || "",
-          webhookUrl:
-            editingAgent.webhookUrl || "https://link_id1234.webhook.com",
+          webhookUrl: editingAgent.webhookUrl || "https://link_id1234.webhook.com",
           description: editingAgent.description || "",
         });
       } else {
@@ -110,9 +106,7 @@ export const AddAgentModal = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.name && formData.apiKey && formData.agentUrl) {
-      const nameWithAt = formData.name.startsWith("@")
-        ? formData.name
-        : `@${formData.name}`;
+      const nameWithAt = formData.name.startsWith("@") ? formData.name : `@${formData.name}`;
       if (isEditing && editingAgent && onUpdateAgent) {
         onUpdateAgent(editingAgent.id, {
           ...formData,
@@ -157,7 +151,7 @@ export const AddAgentModal = ({
   // Функции управления тегами
   const handleTagToggle = (tag: AgentTag) => {
     setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
   };
 
@@ -182,12 +176,7 @@ export const AddAgentModal = ({
               <h2 className="text-xl font-semibold text-gray-900">
                 {isEditing ? "Edit agent" : "Create new agent"}
               </h2>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onClose}
-                className="hover:bg-gray-100"
-              >
+              <Button variant="ghost" size="icon" onClick={onClose} className="hover:bg-gray-100">
                 <X className="h-4 w-4 text-gray-600" />
               </Button>
             </div>
@@ -195,9 +184,7 @@ export const AddAgentModal = ({
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Private Agent Toggle */}
               <div className="flex items-center">
-                <label className="block text-sm font-medium text-gray-700 mb-1 mr-2">
-                  Private
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1 mr-2">Private</label>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
                     type="checkbox"
@@ -217,18 +204,14 @@ export const AddAgentModal = ({
 
               {/* Agent Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Agent name *
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Agent name *</label>
                 <div className="relative">
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-900 font-medium">
                     @
                   </div>
                   <Input
                     value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="Add name for agent"
                     className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-gray-400 pl-8"
                     required
@@ -238,15 +221,11 @@ export const AddAgentModal = ({
 
               {/* API Key */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  API key *
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">API key *</label>
                 <div className="relative">
                   <Input
                     value={formData.apiKey}
-                    onChange={(e) =>
-                      setFormData({ ...formData, apiKey: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, apiKey: e.target.value })}
                     placeholder="Add API key"
                     className="pr-10 bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-gray-400"
                     required
@@ -265,15 +244,11 @@ export const AddAgentModal = ({
 
               {/* Agent URL */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Agent URL *
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Agent URL *</label>
                 <div className="relative">
                   <Input
                     value={formData.agentUrl}
-                    onChange={(e) =>
-                      setFormData({ ...formData, agentUrl: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, agentUrl: e.target.value })}
                     placeholder="Add Agent URL"
                     className="pr-10 bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-gray-400"
                     required
@@ -298,9 +273,7 @@ export const AddAgentModal = ({
                 <div className="relative">
                   <Input
                     value={formData.webhookUrl}
-                    onChange={(e) =>
-                      setFormData({ ...formData, webhookUrl: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, webhookUrl: e.target.value })}
                     className="pr-10 bg-gray-100 border-gray-300 text-gray-700 placeholder-gray-500 cursor-not-allowed"
                     readOnly
                   />
@@ -318,14 +291,10 @@ export const AddAgentModal = ({
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea
                   value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Add agent description"
                   rows={3}
                   className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-gray-900 placeholder-gray-500"
@@ -379,10 +348,7 @@ export const AddAgentModal = ({
                 >
                   Cancel
                 </Button>
-                <Button
-                  type="submit"
-                  className="flex-1 bg-gray-900 hover:bg-gray-800 text-white"
-                >
+                <Button type="submit" className="flex-1 bg-gray-900 hover:bg-gray-800 text-white">
                   {isEditing ? "Save" : "Create Agent"}
                 </Button>
               </div>

@@ -14,7 +14,7 @@ const Heading: FC<HeadingProps> = ({ children, size, fontSize, className }) => {
       className={cn(
         "flex items-center gap-x-3 font-semibold",
         fontSize ? HEADING_SIZES[fontSize] : HEADING_SIZES[size],
-        className,
+        className
       )}
     >
       {children}

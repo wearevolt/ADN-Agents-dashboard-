@@ -15,8 +15,7 @@ import { useEffect } from "react";
 import useChatActions from "@/hooks/useChatActions";
 
 export function AgentSelector() {
-  const { agents, setMessages, setSelectedModel, setHasStorage } =
-    usePlaygroundStore();
+  const { agents, setMessages, setSelectedModel, setHasStorage } = usePlaygroundStore();
   const { focusChatInput } = useChatActions();
   const [agentId, setAgentId] = useQueryState("agent", {
     parse: (value) => value || undefined,
@@ -55,10 +54,7 @@ export function AgentSelector() {
   };
 
   return (
-    <Select
-      value={agentId || ""}
-      onValueChange={(value) => handleOnValueChange(value)}
-    >
+    <Select value={agentId || ""} onValueChange={(value) => handleOnValueChange(value)}>
       <SelectTrigger className="h-9 w-full rounded-xl border border-gray-300 bg-white text-xs font-medium uppercase text-gray-700">
         <SelectValue placeholder="Select Agent" />
       </SelectTrigger>
@@ -76,10 +72,7 @@ export function AgentSelector() {
           </SelectItem>
         ))}
         {agents.length === 0 && (
-          <SelectItem
-            value="no-agents"
-            className="cursor-not-allowed select-none text-center"
-          >
+          <SelectItem value="no-agents" className="cursor-not-allowed select-none text-center">
             No agents found
           </SelectItem>
         )}

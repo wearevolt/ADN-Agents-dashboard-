@@ -18,19 +18,11 @@ const ENDPOINT_PLACEHOLDER = "NO ENDPOINT ADDED";
 const SidebarHeader = () => (
   <div className="flex items-center gap-2">
     <Icon type="agno" size="xs" />
-    <span className="text-xs font-medium uppercase text-gray-700">
-      Agent UI
-    </span>
+    <span className="text-xs font-medium uppercase text-gray-700">Agent UI</span>
   </div>
 );
 
-const NewChatButton = ({
-  disabled,
-  onClick,
-}: {
-  disabled: boolean;
-  onClick: () => void;
-}) => (
+const NewChatButton = ({ disabled, onClick }: { disabled: boolean; onClick: () => void }) => (
   <Button
     className="w-full bg-gray-50 hover:bg-gray-100 text-gray-900 border-gray-200 font-medium"
     onClick={onClick}
@@ -44,9 +36,7 @@ const ModelDisplay = ({ model }: { model: string }) => (
   <div className="flex h-9 w-full items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 p-3 text-xs font-medium uppercase text-gray-700">
     {(() => {
       const icon = getProviderIcon(model);
-      return icon ? (
-        <Icon type={icon} className="shrink-0 text-gray-600" size="xs" />
-      ) : null;
+      return icon ? <Icon type={icon} className="shrink-0 text-gray-600" size="xs" /> : null;
     })()}
     {model}
   </div>
@@ -77,9 +67,10 @@ const Endpoint = () => {
 
   useEffect(() => {
     // Set default Agno API URL from env if endpoint is empty
-    const defaultUrl = (
-      process.env.NEXT_PUBLIC_AGNO_API_URL || "http://localhost:7777"
-    ).replace(/\/$/, "");
+    const defaultUrl = (process.env.NEXT_PUBLIC_AGNO_API_URL || "http://localhost:7777").replace(
+      /\/$/,
+      ""
+    );
     if (
       !selectedEndpoint ||
       selectedEndpoint === "http://localhost:7777" ||
@@ -89,8 +80,7 @@ const Endpoint = () => {
     }
   }, []);
 
-  const getStatusColor = (isActive: boolean) =>
-    isActive ? "bg-green-500" : "bg-red-500";
+  const getStatusColor = (isActive: boolean) => (isActive ? "bg-green-500" : "bg-red-500");
 
   const handleSave = async () => {
     if (!isValidUrl(endpointValue)) {
@@ -130,9 +120,7 @@ const Endpoint = () => {
 
   return (
     <div className="flex flex-col items-start gap-2">
-      <div className="text-xs font-medium uppercase text-gray-700">
-        Endpoint
-      </div>
+      <div className="text-xs font-medium uppercase text-gray-700">Endpoint</div>
       {isEditing ? (
         <div className="flex w-full items-center gap-1">
           <input
@@ -172,8 +160,7 @@ const Endpoint = () => {
                   transition={{ duration: 0.2 }}
                 >
                   <p className="flex items-center gap-2 whitespace-nowrap text-xs font-medium text-gray-800">
-                    <Icon type="edit" size="xxs" className="text-gray-700" />{" "}
-                    EDIT ENDPOINT
+                    <Icon type="edit" size="xxs" className="text-gray-700" /> EDIT ENDPOINT
                   </p>
                 </motion.div>
               ) : (
@@ -187,10 +174,8 @@ const Endpoint = () => {
                 >
                   <p className="text-xs font-medium text-gray-800">
                     {isMounted
-                      ? truncateText(selectedEndpoint, 21) ||
-                        ENDPOINT_PLACEHOLDER
-                      : process.env.NEXT_PUBLIC_AGNO_API_URL ||
-                        "http://localhost:7777"}
+                      ? truncateText(selectedEndpoint, 21) || ENDPOINT_PLACEHOLDER
+                      : process.env.NEXT_PUBLIC_AGNO_API_URL || "http://localhost:7777"}
                   </p>
                   <div
                     className={`size-2 shrink-0 rounded-full ${getStatusColor(isEndpointActive)}`}
@@ -277,10 +262,7 @@ const Sidebar = ({ initialCollapsed = false }: SidebarProps) => {
         }}
       >
         <SidebarHeader />
-        <NewChatButton
-          disabled={messages.length === 0}
-          onClick={handleNewChat}
-        />
+        <NewChatButton disabled={messages.length === 0} onClick={handleNewChat} />
         {isMounted && (
           <>
             <Endpoint />
@@ -292,24 +274,17 @@ const Sidebar = ({ initialCollapsed = false }: SidebarProps) => {
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.5, ease: "easeInOut" }}
                 >
-                  <div className="text-xs font-medium uppercase text-gray-700">
-                    Agent
-                  </div>
+                  <div className="text-xs font-medium uppercase text-gray-700">Agent</div>
                   {isEndpointLoading ? (
                     <div className="flex w-full flex-col gap-2">
                       {Array.from({ length: 2 }).map((_, index) => (
-                        <Skeleton
-                          key={index}
-                          className="h-9 w-full rounded-xl bg-gray-200"
-                        />
+                        <Skeleton key={index} className="h-9 w-full rounded-xl bg-gray-200" />
                       ))}
                     </div>
                   ) : (
                     <>
                       <AgentSelector />
-                      {selectedModel && agentId && (
-                        <ModelDisplay model={selectedModel} />
-                      )}
+                      {selectedModel && agentId && <ModelDisplay model={selectedModel} />}
                     </>
                   )}
                 </motion.div>

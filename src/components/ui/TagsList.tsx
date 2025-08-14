@@ -59,11 +59,7 @@ export const TagsList: React.FC<TagsListProps> = ({
               >
                 <div className="flex flex-wrap gap-1 max-w-48">
                   {tags.map((tag) => (
-                    <Badge
-                      key={tag}
-                      variant="secondary"
-                      className={getTagClassName(tag)}
-                    >
+                    <Badge key={tag} variant="secondary" className={getTagClassName(tag)}>
                       {tag}
                     </Badge>
                   ))}

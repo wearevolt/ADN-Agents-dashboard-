@@ -15,17 +15,11 @@ type SessionItemProps = SessionEntry & {
   isSelected: boolean;
   onSessionClick: () => void;
 };
-const SessionItem = ({
-  title,
-  session_id,
-  isSelected,
-  onSessionClick,
-}: SessionItemProps) => {
+const SessionItem = ({ title, session_id, isSelected, onSessionClick }: SessionItemProps) => {
   const [agentId] = useQueryState("agent");
   const { getSession } = useSessionLoader();
   const [, setSessionId] = useQueryState("session");
-  const { selectedEndpoint, sessionsData, setSessionsData } =
-    usePlaygroundStore();
+  const { selectedEndpoint, sessionsData, setSessionsData } = usePlaygroundStore();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const { clearChat } = useChatActions();
 
@@ -40,15 +34,9 @@ const SessionItem = ({
   const handleDeleteSession = async () => {
     if (agentId) {
       try {
-        const response = await deletePlaygroundSessionAPI(
-          selectedEndpoint,
-          agentId,
-          session_id,
-        );
+        const response = await deletePlaygroundSessionAPI(selectedEndpoint, agentId, session_id);
         if (response.status === 200 && sessionsData) {
-          setSessionsData(
-            sessionsData.filter((session) => session.session_id !== session_id),
-          );
+          setSessionsData(sessionsData.filter((session) => session.session_id !== session_id));
           clearChat();
           toast.success("Session deleted");
         } else {
@@ -68,14 +56,12 @@ const SessionItem = ({
           "group flex h-11 w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2 transition-colors duration-200",
           isSelected
             ? "cursor-default bg-primary/10"
-            : "bg-background-secondary hover:bg-background-secondary/80",
+            : "bg-background-secondary hover:bg-background-secondary/80"
         )}
         onClick={handleGetSession}
       >
         <div className="flex flex-col gap-1">
-          <h4
-            className={cn("text-sm font-medium", isSelected && "text-primary")}
-          >
+          <h4 className={cn("text-sm font-medium", isSelected && "text-primary")}>
             {truncateText(title, 20)}
           </h4>
         </div>

@@ -9,6 +9,5 @@ export const PARAGRAPH_SIZES: ParagraphSizeMap = {
   title: "font-inter text-[0.875rem] font-medium leading-5 tracking-[-0.02em]",
   body: "font-inter text-[0.875rem] font-normal leading-5 tracking-[-0.02em]",
   mono: "font-dmmono text-[0.75rem] font-normal leading-[1.125rem] tracking-[-0.02em]",
-  xsmall:
-    "font-inter text-[0.75rem] font-normal leading-[1.0625rem] tracking-[-0.02em]",
+  xsmall: "font-inter text-[0.75rem] font-normal leading-[1.0625rem] tracking-[-0.02em]",
 };

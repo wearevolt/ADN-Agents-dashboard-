@@ -8,19 +8,17 @@ export const APIRoutes = {
     `${PlaygroundApiUrl}${AGNO_ENDPOINTS.CHAT}`,
   PlaygroundStatus: (PlaygroundApiUrl: string = AGNO_CONFIG.API_URL) =>
     `${PlaygroundApiUrl}${AGNO_ENDPOINTS.STATUS}`,
-  GetPlaygroundSessions: (
-    PlaygroundApiUrl: string = AGNO_CONFIG.API_URL,
-    agentId: string,
-  ) => `${PlaygroundApiUrl}${AGNO_ENDPOINTS.SESSIONS}/${agentId}`,
+  GetPlaygroundSessions: (PlaygroundApiUrl: string = AGNO_CONFIG.API_URL, agentId: string) =>
+    `${PlaygroundApiUrl}${AGNO_ENDPOINTS.SESSIONS}/${agentId}`,
   GetPlaygroundSession: (
     PlaygroundApiUrl: string = AGNO_CONFIG.API_URL,
     agentId: string,
-    sessionId: string,
+    sessionId: string
   ) => `${PlaygroundApiUrl}${AGNO_ENDPOINTS.SESSIONS}/${agentId}/${sessionId}`,
 
   DeletePlaygroundSession: (
     PlaygroundApiUrl: string = AGNO_CONFIG.API_URL,
     agentId: string,
-    sessionId: string,
+    sessionId: string
   ) => `${PlaygroundApiUrl}${AGNO_ENDPOINTS.SESSIONS}/${agentId}/${sessionId}`,
 };

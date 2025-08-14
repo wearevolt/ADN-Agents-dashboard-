@@ -2,7 +2,7 @@ export function decodeBase64Audio(
   base64String: string,
   mimeType = "audio/mpeg",
   sampleRate = 44100,
-  numChannels = 1,
+  numChannels = 1
 ): string {
   // Convert the Base64 string to binary
   const byteString = atob(base64String);
@@ -16,11 +16,7 @@ export function decodeBase64Audio(
 
   if (mimeType === "audio/pcm16") {
     // Convert PCM16 raw audio to WAV format
-    const wavHeader = createWavHeader(
-      byteArray.length,
-      sampleRate,
-      numChannels,
-    );
+    const wavHeader = createWavHeader(byteArray.length, sampleRate, numChannels);
     const wavData = new Uint8Array(wavHeader.length + byteArray.length);
     wavData.set(wavHeader, 0);
     wavData.set(byteArray, wavHeader.length);
@@ -34,11 +30,7 @@ export function decodeBase64Audio(
 }
 
 // Function to generate WAV header for PCM16
-function createWavHeader(
-  dataLength: number,
-  sampleRate: number,
-  numChannels: number,
-): Uint8Array {
+function createWavHeader(dataLength: number, sampleRate: number, numChannels: number): Uint8Array {
   const header = new ArrayBuffer(44);
   const view = new DataView(header);
 

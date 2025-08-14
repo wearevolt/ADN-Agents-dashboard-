@@ -5,9 +5,7 @@ import { getAgnoHeaders } from "@/lib/config";
 
 import { Agent, ComboboxAgent, SessionEntry } from "@/types/playground";
 
-export const getPlaygroundAgentsAPI = async (
-  endpoint: string = "",
-): Promise<ComboboxAgent[]> => {
+export const getPlaygroundAgentsAPI = async (endpoint: string = ""): Promise<ComboboxAgent[]> => {
   const url = APIRoutes.GetPlaygroundAgents(endpoint);
   try {
     const response = await fetch(url, {
@@ -34,9 +32,7 @@ export const getPlaygroundAgentsAPI = async (
   }
 };
 
-export const getPlaygroundStatusAPI = async (
-  base: string = "",
-): Promise<number> => {
+export const getPlaygroundStatusAPI = async (base: string = ""): Promise<number> => {
   const response = await fetch(APIRoutes.PlaygroundStatus(base), {
     method: "GET",
     headers: getAgnoHeaders(),
@@ -46,16 +42,13 @@ export const getPlaygroundStatusAPI = async (
 
 export const getAllPlaygroundSessionsAPI = async (
   base: string = "",
-  agentId: string,
+  agentId: string
 ): Promise<SessionEntry[]> => {
   try {
-    const response = await fetch(
-      APIRoutes.GetPlaygroundSessions(base, agentId),
-      {
-        method: "GET",
-        headers: getAgnoHeaders(),
-      },
-    );
+    const response = await fetch(APIRoutes.GetPlaygroundSessions(base, agentId), {
+      method: "GET",
+      headers: getAgnoHeaders(),
+    });
     if (!response.ok) {
       if (response.status === 404) {
         // Return empty array when storage is not enabled
@@ -73,30 +66,24 @@ export const getAllPlaygroundSessionsAPI = async (
 export const getPlaygroundSessionAPI = async (
   base: string = "",
   agentId: string,
-  sessionId: string,
+  sessionId: string
 ) => {
-  const response = await fetch(
-    APIRoutes.GetPlaygroundSession(base, agentId, sessionId),
-    {
-      method: "GET",
-      headers: getAgnoHeaders(),
-    },
-  );
+  const response = await fetch(APIRoutes.GetPlaygroundSession(base, agentId, sessionId), {
+    method: "GET",
+    headers: getAgnoHeaders(),
+  });
   return response.json();
 };
 
 export const deletePlaygroundSessionAPI = async (
   base: string = "",
   agentId: string,
-  sessionId: string,
+  sessionId: string
 ) => {
-  const response = await fetch(
-    APIRoutes.DeletePlaygroundSession(base, agentId, sessionId),
-    {
-      method: "DELETE",
-      headers: getAgnoHeaders(),
-    },
-  );
+  const response = await fetch(APIRoutes.DeletePlaygroundSession(base, agentId, sessionId), {
+    method: "DELETE",
+    headers: getAgnoHeaders(),
+  });
   return response;
 };
 
@@ -104,7 +91,7 @@ export const deletePlaygroundSessionAPI = async (
 export const sendMessageToAgentAPI = async (
   message: string,
   agentId: string,
-  sessionId?: string,
+  sessionId?: string
 ) => {
   try {
     const response = await fetch(APIRoutes.AgentRun(), {

@@ -45,66 +45,40 @@ const filterProps = (props: object) => {
 
 const UnorderedList = ({ className, ...props }: UnorderedListProps) => (
   <ul
-    className={cn(
-      className,
-      PARAGRAPH_SIZES.body,
-      "flex list-disc flex-col pl-10",
-    )}
+    className={cn(className, PARAGRAPH_SIZES.body, "flex list-disc flex-col pl-10")}
     {...filterProps(props)}
   />
 );
 
 const OrderedList = ({ className, ...props }: OrderedListProps) => (
   <ol
-    className={cn(
-      className,
-      PARAGRAPH_SIZES.body,
-      "flex list-decimal flex-col pl-10",
-    )}
+    className={cn(className, PARAGRAPH_SIZES.body, "flex list-decimal flex-col pl-10")}
     {...filterProps(props)}
   />
 );
 
 const Paragraph = ({ className, ...props }: ParagraphProps) => (
-  <div
-    className={cn(className, PARAGRAPH_SIZES.body)}
-    {...filterProps(props)}
-  />
+  <div className={cn(className, PARAGRAPH_SIZES.body)} {...filterProps(props)} />
 );
 
 const EmphasizedText = ({ className, ...props }: EmphasizedTextProps) => (
-  <em
-    className={cn(className, "text-sm font-semibold")}
-    {...filterProps(props)}
-  />
+  <em className={cn(className, "text-sm font-semibold")} {...filterProps(props)} />
 );
 
 const ItalicText = ({ className, ...props }: ItalicTextProps) => (
-  <i
-    className={cn(className, "italic", PARAGRAPH_SIZES.body)}
-    {...filterProps(props)}
-  />
+  <i className={cn(className, "italic", PARAGRAPH_SIZES.body)} {...filterProps(props)} />
 );
 
 const StrongText = ({ className, ...props }: StrongTextProps) => (
-  <strong
-    className={cn(className, "text-sm font-semibold")}
-    {...filterProps(props)}
-  />
+  <strong className={cn(className, "text-sm font-semibold")} {...filterProps(props)} />
 );
 
 const BoldText = ({ className, ...props }: BoldTextProps) => (
-  <b
-    className={cn(className, "text-sm font-semibold")}
-    {...filterProps(props)}
-  />
+  <b className={cn(className, "text-sm font-semibold")} {...filterProps(props)} />
 );
 
 const UnderlinedText = ({ className, ...props }: UnderlinedTextProps) => (
-  <u
-    className={cn(className, "underline", PARAGRAPH_SIZES.body)}
-    {...filterProps(props)}
-  />
+  <u className={cn(className, "underline", PARAGRAPH_SIZES.body)} {...filterProps(props)} />
 );
 
 const DeletedText = ({ className, ...props }: DeletedTextProps) => (
@@ -115,10 +89,7 @@ const DeletedText = ({ className, ...props }: DeletedTextProps) => (
 );
 
 const HorizontalRule = ({ className, ...props }: HorizontalRuleProps) => (
-  <hr
-    className={cn(className, "mx-auto w-48 border-b border-border")}
-    {...filterProps(props)}
-  />
+  <hr className={cn(className, "mx-auto w-48 border-b border-border")} {...filterProps(props)} />
 );
 
 const InlineCode: FC<PreparedTextProps> = ({ children }) => {
@@ -130,10 +101,7 @@ const InlineCode: FC<PreparedTextProps> = ({ children }) => {
 };
 
 const Blockquote = ({ className, ...props }: BlockquoteProps) => (
-  <blockquote
-    className={cn(className, "italic", PARAGRAPH_SIZES.body)}
-    {...filterProps(props)}
-  />
+  <blockquote className={cn(className, "italic", PARAGRAPH_SIZES.body)} {...filterProps(props)} />
 );
 
 const AnchorLink = ({ className, ...props }: AnchorLinkProps) => (
@@ -162,17 +130,11 @@ const Heading4 = ({ className, ...props }: HeadingProps) => (
 );
 
 const Heading5 = ({ className, ...props }: HeadingProps) => (
-  <h5
-    className={cn(className, PARAGRAPH_SIZES.title)}
-    {...filterProps(props)}
-  />
+  <h5 className={cn(className, PARAGRAPH_SIZES.title)} {...filterProps(props)} />
 );
 
 const Heading6 = ({ className, ...props }: HeadingProps) => (
-  <h6
-    className={cn(className, PARAGRAPH_SIZES.title)}
-    {...filterProps(props)}
-  />
+  <h6 className={cn(className, PARAGRAPH_SIZES.title)} {...filterProps(props)} />
 );
 
 const Img = ({ src, alt }: ImgProps) => {
@@ -220,17 +182,14 @@ const TableHead = ({ className, ...props }: TableHeaderProps) => (
   <thead
     className={cn(
       className,
-      "rounded-md border-b border-border bg-transparent p-2 text-left text-sm font-[600]",
+      "rounded-md border-b border-border bg-transparent p-2 text-left text-sm font-[600]"
     )}
     {...filterProps(props)}
   />
 );
 
 const TableHeadCell = ({ className, ...props }: TableHeaderCellProps) => (
-  <th
-    className={cn(className, "p-2 text-sm font-[600]")}
-    {...filterProps(props)}
-  />
+  <th className={cn(className, "p-2 text-sm font-[600]")} {...filterProps(props)} />
 );
 
 const TableBody = ({ className, ...props }: TableBodyProps) => (
@@ -238,17 +197,11 @@ const TableBody = ({ className, ...props }: TableBodyProps) => (
 );
 
 const TableRow = ({ className, ...props }: TableRowProps) => (
-  <tr
-    className={cn(className, "border-b border-border last:border-b-0")}
-    {...filterProps(props)}
-  />
+  <tr className={cn(className, "border-b border-border last:border-b-0")} {...filterProps(props)} />
 );
 
 const TableCell = ({ className, ...props }: TableCellProps) => (
-  <td
-    className={cn(className, "whitespace-nowrap p-2 font-[400]")}
-    {...filterProps(props)}
-  />
+  <td className={cn(className, "whitespace-nowrap p-2 font-[400]")} {...filterProps(props)} />
 );
 
 export const components = {

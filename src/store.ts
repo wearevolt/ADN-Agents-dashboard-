@@ -1,10 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-import {
-  type PlaygroundChatMessage,
-  type SessionEntry,
-} from "@/types/playground";
+import { type PlaygroundChatMessage, type SessionEntry } from "@/types/playground";
 
 interface Agent {
   value: string;
@@ -28,7 +25,7 @@ interface PlaygroundStore {
     endpoints: {
       endpoint: string;
       id_playground_endpoint: string;
-    }[],
+    }[]
   ) => void;
   isStreaming: boolean;
   setIsStreaming: (isStreaming: boolean) => void;
@@ -40,7 +37,7 @@ interface PlaygroundStore {
   setMessages: (
     messages:
       | PlaygroundChatMessage[]
-      | ((prevMessages: PlaygroundChatMessage[]) => PlaygroundChatMessage[]),
+      | ((prevMessages: PlaygroundChatMessage[]) => PlaygroundChatMessage[])
   ) => void;
   hasStorage: boolean;
   setHasStorage: (hasStorage: boolean) => void;
@@ -53,9 +50,7 @@ interface PlaygroundStore {
   setSelectedModel: (model: string) => void;
   sessionsData: SessionEntry[] | null;
   setSessionsData: (
-    sessionsData:
-      | SessionEntry[]
-      | ((prevSessions: SessionEntry[] | null) => SessionEntry[] | null),
+    sessionsData: SessionEntry[] | ((prevSessions: SessionEntry[] | null) => SessionEntry[] | null)
   ) => void;
   isSessionsLoading: boolean;
   setIsSessionsLoading: (isSessionsLoading: boolean) => void;
@@ -67,34 +62,28 @@ export const usePlaygroundStore = create<PlaygroundStore>()(
       hydrated: false,
       setHydrated: () => set({ hydrated: true }),
       streamingErrorMessage: "",
-      setStreamingErrorMessage: (streamingErrorMessage) =>
-        set(() => ({ streamingErrorMessage })),
+      setStreamingErrorMessage: (streamingErrorMessage) => set(() => ({ streamingErrorMessage })),
       endpoints: [],
       setEndpoints: (endpoints) => set(() => ({ endpoints })),
       isStreaming: false,
       setIsStreaming: (isStreaming) => set(() => ({ isStreaming })),
       isEndpointActive: false,
-      setIsEndpointActive: (isActive) =>
-        set(() => ({ isEndpointActive: isActive })),
+      setIsEndpointActive: (isActive) => set(() => ({ isEndpointActive: isActive })),
       isEndpointLoading: true,
-      setIsEndpointLoading: (isLoading) =>
-        set(() => ({ isEndpointLoading: isLoading })),
+      setIsEndpointLoading: (isLoading) => set(() => ({ isEndpointLoading: isLoading })),
       messages: [],
       setMessages: (messages) =>
         set((state) => ({
-          messages:
-            typeof messages === "function"
-              ? messages(state.messages)
-              : messages,
+          messages: typeof messages === "function" ? messages(state.messages) : messages,
         })),
       hasStorage: false,
       setHasStorage: (hasStorage) => set(() => ({ hasStorage })),
       chatInputRef: { current: null },
-      selectedEndpoint: (
-        process.env.NEXT_PUBLIC_AGNO_API_URL || "http://localhost:7777"
-      ).replace(/\/$/, ""),
-      setSelectedEndpoint: (selectedEndpoint) =>
-        set(() => ({ selectedEndpoint })),
+      selectedEndpoint: (process.env.NEXT_PUBLIC_AGNO_API_URL || "http://localhost:7777").replace(
+        /\/$/,
+        ""
+      ),
+      setSelectedEndpoint: (selectedEndpoint) => set(() => ({ selectedEndpoint })),
       agents: [],
       setAgents: (agents) => set({ agents }),
       selectedModel: process.env.NEXT_PUBLIC_DEFAULT_MODEL || "",
@@ -103,13 +92,10 @@ export const usePlaygroundStore = create<PlaygroundStore>()(
       setSessionsData: (sessionsData) =>
         set((state) => ({
           sessionsData:
-            typeof sessionsData === "function"
-              ? sessionsData(state.sessionsData)
-              : sessionsData,
+            typeof sessionsData === "function" ? sessionsData(state.sessionsData) : sessionsData,
         })),
       isSessionsLoading: false,
-      setIsSessionsLoading: (isSessionsLoading) =>
-        set(() => ({ isSessionsLoading })),
+      setIsSessionsLoading: (isSessionsLoading) => set(() => ({ isSessionsLoading })),
     }),
     {
       name: "endpoint-storage",
@@ -120,6 +106,6 @@ export const usePlaygroundStore = create<PlaygroundStore>()(
       onRehydrateStorage: () => (state) => {
         state?.setHydrated?.();
       },
-    },
-  ),
+    }
+  )
 );

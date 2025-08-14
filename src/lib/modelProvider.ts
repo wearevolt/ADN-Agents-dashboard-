@@ -18,8 +18,6 @@ const PROVIDER_ICON_MAP: Record<string, IconType> = {
 export const getProviderIcon = (provider: string): IconType | null => {
   const normalizedProvider = provider.toLowerCase();
   return (
-    Object.entries(PROVIDER_ICON_MAP).find(([key]) =>
-      normalizedProvider.includes(key),
-    )?.[1] ?? null
+    Object.entries(PROVIDER_ICON_MAP).find(([key]) => normalizedProvider.includes(key))?.[1] ?? null
   );
 };

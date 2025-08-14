@@ -15,19 +15,10 @@ interface MarkdownRendererProps {
   inline?: boolean;
 }
 
-type DefaultHTMLElement = DetailedHTMLProps<
-  HTMLAttributes<HTMLElement>,
-  HTMLElement
->;
+type DefaultHTMLElement = DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTMLElement>;
 
-type UnorderedListProps = DetailedHTMLProps<
-  HTMLAttributes<HTMLUListElement>,
-  HTMLUListElement
->;
-type OrderedListProps = DetailedHTMLProps<
-  OlHTMLAttributes<HTMLOListElement>,
-  HTMLOListElement
->;
+type UnorderedListProps = DetailedHTMLProps<HTMLAttributes<HTMLUListElement>, HTMLUListElement>;
+type OrderedListProps = DetailedHTMLProps<OlHTMLAttributes<HTMLOListElement>, HTMLOListElement>;
 
 type EmphasizedTextProps = DefaultHTMLElement;
 type ItalicTextProps = DefaultHTMLElement;
@@ -37,20 +28,11 @@ type BoldTextProps = DefaultHTMLElement;
 
 type UnderlinedTextProps = DefaultHTMLElement;
 
-type DeletedTextProps = DetailedHTMLProps<
-  DelHTMLAttributes<HTMLModElement>,
-  HTMLModElement
->;
+type DeletedTextProps = DetailedHTMLProps<DelHTMLAttributes<HTMLModElement>, HTMLModElement>;
 
-type HorizontalRuleProps = DetailedHTMLProps<
-  HTMLAttributes<HTMLHRElement>,
-  HTMLHRElement
->;
+type HorizontalRuleProps = DetailedHTMLProps<HTMLAttributes<HTMLHRElement>, HTMLHRElement>;
 
-type PreparedTextProps = DetailedHTMLProps<
-  HTMLAttributes<HTMLPreElement>,
-  HTMLPreElement
->;
+type PreparedTextProps = DetailedHTMLProps<HTMLAttributes<HTMLPreElement>, HTMLPreElement>;
 
 type BlockquoteProps = DetailedHTMLProps<
   BlockquoteHTMLAttributes<HTMLQuoteElement>,
@@ -62,20 +44,11 @@ type AnchorLinkProps = DetailedHTMLProps<
   HTMLAnchorElement
 >;
 
-type HeadingProps = DetailedHTMLProps<
-  HTMLAttributes<HTMLHeadingElement>,
-  HTMLHeadingElement
->;
+type HeadingProps = DetailedHTMLProps<HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
 
-type ImgProps = DetailedHTMLProps<
-  ImgHTMLAttributes<HTMLImageElement>,
-  HTMLImageElement
->;
+type ImgProps = DetailedHTMLProps<ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>;
 
-type ParagraphProps = DetailedHTMLProps<
-  HTMLAttributes<HTMLParagraphElement>,
-  HTMLParagraphElement
->;
+type ParagraphProps = DetailedHTMLProps<HTMLAttributes<HTMLParagraphElement>, HTMLParagraphElement>;
 
 type TableProps = React.DetailedHTMLProps<
   React.TableHTMLAttributes<HTMLTableElement>,
@@ -97,15 +70,9 @@ type TableHeaderCellProps = DetailedHTMLProps<
   HTMLTableHeaderCellElement
 >;
 
-type TableRowProps = DetailedHTMLProps<
-  HTMLAttributes<HTMLTableRowElement>,
-  HTMLTableRowElement
->;
+type TableRowProps = DetailedHTMLProps<HTMLAttributes<HTMLTableRowElement>, HTMLTableRowElement>;
 
-type TableCellProps = DetailedHTMLProps<
-  HTMLAttributes<HTMLTableCellElement>,
-  HTMLTableCellElement
->;
+type TableCellProps = DetailedHTMLProps<HTMLAttributes<HTMLTableCellElement>, HTMLTableCellElement>;
 
 export type {
   MarkdownRendererProps,

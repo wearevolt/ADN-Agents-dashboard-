@@ -36,16 +36,10 @@ export default function Home() {
   }
 
   return (
-    <Suspense
-      fallback={<div className="bg-white text-gray-900">Загрузка...</div>}
-    >
+    <Suspense fallback={<div className="bg-white text-gray-900">Загрузка...</div>}>
       <div className="flex h-screen bg-gray-50">
         <Sidebar initialCollapsed={true} />
-        <Dashboard
-          onOpenChat={handleOpenChat}
-          user={user}
-          onLogout={handleLogout}
-        />
+        <Dashboard onOpenChat={handleOpenChat} user={user} onLogout={handleLogout} />
         <ChatModal isOpen={showChatModal} onClose={handleCloseChat} />
       </div>
     </Suspense>

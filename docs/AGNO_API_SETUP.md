@@ -26,10 +26,7 @@
 Обновите файл `src/lib/constructEndpointUrl.ts` для работы с реальным API:
 
 ```typescript
-export const constructEndpointUrl = (
-  endpoint: string,
-  path: string,
-): string => {
+export const constructEndpointUrl = (endpoint: string, path: string): string => {
   const baseUrl = endpoint.replace(/\/$/, "");
   return `${baseUrl}${path}`;
 };
@@ -49,18 +46,15 @@ export const getApiHeaders = (apiKey: string) => ({
 ```typescript
 const handleStreamResponse = async (message: string) => {
   try {
-    const response = await fetch(
-      constructEndpointUrl(selectedEndpoint, "/v1/chat/completions"),
-      {
-        method: "POST",
-        headers: getApiHeaders(apiKey), // Используйте API-ключ из настроек
-        body: JSON.stringify({
-          model: selectedModel,
-          messages: [...messages, { role: "user", content: message }],
-          stream: true,
-        }),
-      },
-    );
+    const response = await fetch(constructEndpointUrl(selectedEndpoint, "/v1/chat/completions"), {
+      method: "POST",
+      headers: getApiHeaders(apiKey), // Используйте API-ключ из настроек
+      body: JSON.stringify({
+        model: selectedModel,
+        messages: [...messages, { role: "user", content: message }],
+        stream: true,
+      }),
+    });
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -166,8 +160,7 @@ AGNO_API_KEY=your-api-key-here
 И используйте их в коде:
 
 ```typescript
-const defaultEndpoint =
-  process.env.NEXT_PUBLIC_AGNO_API_URL || "http://localhost:7777";
+const defaultEndpoint = process.env.NEXT_PUBLIC_AGNO_API_URL || "http://localhost:7777";
 const defaultModel = process.env.NEXT_PUBLIC_DEFAULT_MODEL || "gpt-3.5-turbo";
 ```
 

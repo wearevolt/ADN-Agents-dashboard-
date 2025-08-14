@@ -29,11 +29,7 @@ interface AgentInfoModalProps {
   agent: Agent | null;
 }
 
-export const AgentInfoModal = ({
-  isOpen,
-  onClose,
-  agent,
-}: AgentInfoModalProps) => {
+export const AgentInfoModal = ({ isOpen, onClose, agent }: AgentInfoModalProps) => {
   if (!agent) return null;
 
   // Функция для получения имени создателя
@@ -71,15 +67,8 @@ export const AgentInfoModal = ({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">
-                Agent Info
-              </h2>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onClose}
-                className="hover:bg-gray-100"
-              >
+              <h2 className="text-xl font-semibold text-gray-900">Agent Info</h2>
+              <Button variant="ghost" size="icon" onClick={onClose} className="hover:bg-gray-100">
                 <X className="h-4 w-4 text-gray-600" />
               </Button>
             </div>
@@ -87,28 +76,20 @@ export const AgentInfoModal = ({
             <div className="space-y-4">
               {/* Agent Name */}
               <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-1">
-                  Agent Name
-                </h3>
+                <h3 className="text-sm font-medium text-gray-700 mb-1">Agent Name</h3>
                 <p className="text-gray-900 text-sm">{agent.name}</p>
               </div>
 
               {/* Created By */}
               <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-1">
-                  Created by
-                </h3>
-                <p className="text-gray-900 text-sm">
-                  {getCreatorName(agent.createdBy)}
-                </p>
+                <h3 className="text-sm font-medium text-gray-700 mb-1">Created by</h3>
+                <p className="text-gray-900 text-sm">{getCreatorName(agent.createdBy)}</p>
               </div>
 
               {/* Description */}
               {agent.description && (
                 <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-1">
-                    Description
-                  </h3>
+                  <h3 className="text-sm font-medium text-gray-700 mb-1">Description</h3>
                   <p className="text-gray-900 text-sm break-words whitespace-pre-wrap">
                     {agent.description}
                   </p>
@@ -118,9 +99,7 @@ export const AgentInfoModal = ({
               {/* Tags */}
               {agent.tags && agent.tags.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">
-                    Tags
-                  </h3>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">Tags</h3>
                   <div className="flex flex-wrap gap-1">
                     {agent.tags.map((tag) => (
                       <Badge

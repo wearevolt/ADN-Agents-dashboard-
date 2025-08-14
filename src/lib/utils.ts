@@ -23,7 +23,7 @@ export const isValidUrl = (url: string): boolean => {
         "(\\/[-a-zA-Z\\d%@_.~+&:]*)*" +
         "(\\?[;&a-zA-Z\\d%@_.,~+&:=-]*)?" +
         "(\\#[-a-zA-Z\\d_]*)?$",
-      "i",
+      "i"
     );
 
     return pattern.test(url.trim());

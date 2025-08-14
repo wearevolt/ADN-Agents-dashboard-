@@ -2,10 +2,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  getPlaygroundAgentsAPI,
-  getPlaygroundStatusAPI,
-} from "@/api/playground";
+import { getPlaygroundAgentsAPI, getPlaygroundStatusAPI } from "@/api/playground";
 import { AGNO_CONFIG, ALTERNATIVE_ENDPOINTS } from "@/lib/config";
 
 export const TestAgnoConnection: React.FC = () => {
@@ -44,10 +41,7 @@ export const TestAgnoConnection: React.FC = () => {
 
         if (response.ok) {
           hasWorking = true;
-          if (
-            endpoint.name.includes("Models") ||
-            endpoint.name.includes("Agents")
-          ) {
+          if (endpoint.name.includes("Models") || endpoint.name.includes("Agents")) {
             try {
               const data = await response.json();
               const agentsList = Array.isArray(data) ? data : data.data || [];
@@ -79,10 +73,7 @@ export const TestAgnoConnection: React.FC = () => {
     // Тестируем все альтернативные endpoints
     for (const endpoint of ALTERNATIVE_ENDPOINTS) {
       allResults.push(`\n🔍 Тестируем: ${endpoint}`);
-      const { results, hasWorking } = await testSingleEndpoint(
-        endpoint,
-        AGNO_CONFIG.API_KEY,
-      );
+      const { results, hasWorking } = await testSingleEndpoint(endpoint, AGNO_CONFIG.API_KEY);
       allResults.push(...results);
 
       if (hasWorking && !foundWorking) {
@@ -98,9 +89,7 @@ export const TestAgnoConnection: React.FC = () => {
       setMessage(`Найден рабочий endpoint: ${workingEndpoint}`);
     } else {
       setStatus("error");
-      setMessage(
-        "Ни один endpoint не доступен. Возможно нужно запустить локальный Agno сервер.",
-      );
+      setMessage("Ни один endpoint не доступен. Возможно нужно запустить локальный Agno сервер.");
     }
 
     setIsLoading(false);
@@ -122,23 +111,15 @@ export const TestAgnoConnection: React.FC = () => {
         </div>
 
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <h4 className="font-medium text-yellow-800 mb-2">
-            ⚠️ Проблема найдена:
-          </h4>
+          <h4 className="font-medium text-yellow-800 mb-2">⚠️ Проблема найдена:</h4>
           <p className="text-sm text-yellow-700">
-            Хост <code>api.agno.ai</code> недоступен. Agno - это локальный
-            фреймворк, нужно запустить сервер локально.
+            Хост <code>api.agno.ai</code> недоступен. Agno - это локальный фреймворк, нужно
+            запустить сервер локально.
           </p>
         </div>
 
-        <Button
-          onClick={testConnection}
-          disabled={isLoading}
-          className="w-full"
-        >
-          {isLoading
-            ? "Тестирование всех endpoints..."
-            : "Найти рабочий API endpoint"}
+        <Button onClick={testConnection} disabled={isLoading} className="w-full">
+          {isLoading ? "Тестирование всех endpoints..." : "Найти рабочий API endpoint"}
         </Button>
 
         {testResults.length > 0 && (
@@ -149,9 +130,7 @@ export const TestAgnoConnection: React.FC = () => {
                 <div
                   key={index}
                   className={`text-sm font-mono p-2 rounded ${
-                    result.includes("🔍")
-                      ? "bg-blue-100 font-bold"
-                      : "bg-gray-100"
+                    result.includes("🔍") ? "bg-blue-100 font-bold" : "bg-gray-100"
                   }`}
                 >
                   {result}
@@ -164,20 +143,15 @@ export const TestAgnoConnection: React.FC = () => {
         {status !== "idle" && (
           <div className="space-y-2">
             <Badge variant={status === "success" ? "default" : "destructive"}>
-              {status === "success"
-                ? "Найден рабочий endpoint"
-                : "Нет доступных endpoints"}
+              {status === "success" ? "Найден рабочий endpoint" : "Нет доступных endpoints"}
             </Badge>
             <p className="text-sm">{message}</p>
 
             {workingEndpoint && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <p className="text-sm text-green-700">
-                  💡 <strong>Рекомендация:</strong> Установите endpoint в
-                  сайдбаре:
-                  <code className="bg-green-100 px-1 rounded">
-                    {workingEndpoint}
-                  </code>
+                  💡 <strong>Рекомендация:</strong> Установите endpoint в сайдбаре:
+                  <code className="bg-green-100 px-1 rounded">{workingEndpoint}</code>
                 </p>
               </div>
             )}
@@ -191,9 +165,7 @@ export const TestAgnoConnection: React.FC = () => {
               {agents.map((agent, index) => (
                 <div key={index} className="p-2 bg-gray-50 rounded text-sm">
                   <strong>{agent.label || agent.name || agent.id}</strong>
-                  {agent.model && (
-                    <span className="ml-2 text-gray-600">({agent.model})</span>
-                  )}
+                  {agent.model && <span className="ml-2 text-gray-600">({agent.model})</span>}
                 </div>
               ))}
             </div>
@@ -201,9 +173,7 @@ export const TestAgnoConnection: React.FC = () => {
         )}
 
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h4 className="font-medium text-blue-800 mb-2">
-            💡 Как запустить Agno локально:
-          </h4>
+          <h4 className="font-medium text-blue-800 mb-2">💡 Как запустить Agno локально:</h4>
           <ol className="text-sm text-blue-700 list-decimal list-inside space-y-1">
             <li>
               Установите: <code>pip install agno</code>

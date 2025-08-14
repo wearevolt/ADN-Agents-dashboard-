@@ -1,6 +1,4 @@
-export const constructEndpointUrl = (
-  value: string | null | undefined,
-): string => {
+export const constructEndpointUrl = (value: string | null | undefined): string => {
   if (!value) return "";
 
   if (value.startsWith("http://") || value.startsWith("https://")) {
@@ -8,10 +6,7 @@ export const constructEndpointUrl = (
   }
 
   // Check if the endpoint is localhost or an IP address
-  if (
-    value.startsWith("localhost") ||
-    /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.test(value)
-  ) {
+  if (value.startsWith("localhost") || /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/.test(value)) {
     return `http://${decodeURIComponent(value)}`;
   }
 

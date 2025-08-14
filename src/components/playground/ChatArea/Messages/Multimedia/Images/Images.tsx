@@ -4,12 +4,7 @@ import { type ImageData } from "@/types/playground";
 import { cn } from "@/lib/utils";
 
 const Images = ({ images }: { images: ImageData[] }) => (
-  <div
-    className={cn(
-      "grid max-w-xl gap-4",
-      images.length > 1 ? "grid-cols-2" : "grid-cols-1",
-    )}
-  >
+  <div className={cn("grid max-w-xl gap-4", images.length > 1 ? "grid-cols-2" : "grid-cols-1")}>
     {images.map((image) => (
       <div key={image.url} className="group relative">
         {/* eslint-disable-next-line @next/next/no-img-element */}

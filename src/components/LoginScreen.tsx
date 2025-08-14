@@ -1,13 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCallback, useEffect, useState } from "react";
 import type { Container, Engine } from "tsparticles";
 import { loadSlim } from "tsparticles-slim";
@@ -31,12 +25,9 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
     await loadSlim(engine);
   }, []);
 
-  const particlesLoaded = useCallback(
-    async (container: Container | undefined) => {
-      console.log("Particles loaded");
-    },
-    [],
-  );
+  const particlesLoaded = useCallback(async (container: Container | undefined) => {
+    console.log("Particles loaded");
+  }, []);
 
   useEffect(() => {
     setInit(true);

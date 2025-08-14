@@ -30,15 +30,9 @@ const AgentMessage = ({ message }: MessageProps) => {
     messageContent = (
       <div className="flex w-full flex-col gap-4">
         <MarkdownRenderer>{message.content}</MarkdownRenderer>
-        {message.videos && message.videos.length > 0 && (
-          <Videos videos={message.videos} />
-        )}
-        {message.images && message.images.length > 0 && (
-          <Images images={message.images} />
-        )}
-        {message.audio && message.audio.length > 0 && (
-          <Audios audio={message.audio} />
-        )}
+        {message.videos && message.videos.length > 0 && <Videos videos={message.videos} />}
+        {message.images && message.images.length > 0 && <Images images={message.images} />}
+        {message.audio && message.audio.length > 0 && <Audios audio={message.audio} />}
       </div>
     );
   } else if (message.response_audio) {
@@ -51,9 +45,7 @@ const AgentMessage = ({ message }: MessageProps) => {
     } else {
       messageContent = (
         <div className="flex w-full flex-col gap-4">
-          <MarkdownRenderer>
-            {message.response_audio.transcript}
-          </MarkdownRenderer>
+          <MarkdownRenderer>{message.response_audio.transcript}</MarkdownRenderer>
           {message.response_audio.content && message.response_audio && (
             <Audios audio={[message.response_audio]} />
           )}
@@ -85,9 +77,7 @@ const UserMessage = memo(({ message }: MessageProps) => {
         <p className="flex items-center gap-x-2 text-sm font-medium text-gray-600">
           <Icon type="user" size="sm" />
         </p>
-        <div className="text-md rounded-lg py-1 font-geist text-gray-900">
-          {message.content}
-        </div>
+        <div className="text-md rounded-lg py-1 font-geist text-gray-900">{message.content}</div>
       </div>
     </div>
   );

@@ -6,10 +6,7 @@ import { type RunResponse } from "@/types/playground";
  * @param chunk - A parsed JSON object of type RunResponse.
  * @param onChunk - Callback to handle the chunk.
  */
-function processChunk(
-  chunk: RunResponse,
-  onChunk: (chunk: RunResponse) => void,
-) {
+function processChunk(chunk: RunResponse, onChunk: (chunk: RunResponse) => void) {
   onChunk(chunk);
 }
 
@@ -28,10 +25,7 @@ function processChunk(
  * - It allows partial JSON objects to accumulate across chunks.
  * - It ensures real-time streaming updates.
  */
-function parseBuffer(
-  buffer: string,
-  onChunk: (chunk: RunResponse) => void,
-): string {
+function parseBuffer(buffer: string, onChunk: (chunk: RunResponse) => void): string {
   let jsonStartIndex = buffer.indexOf("{");
   let jsonEndIndex = -1;
 
@@ -104,14 +98,7 @@ export default function useAIResponseStream() {
       onError: (error: Error) => void;
       onComplete: () => void;
     }): Promise<void> => {
-      const {
-        apiUrl,
-        headers = {},
-        requestBody,
-        onChunk,
-        onError,
-        onComplete,
-      } = options;
+      const { apiUrl, headers = {}, requestBody, onChunk, onError, onComplete } = options;
 
       // Buffer to accumulate partial JSON data.
       let buffer = "";
@@ -126,10 +113,7 @@ export default function useAIResponseStream() {
             }),
             ...headers,
           },
-          body:
-            requestBody instanceof FormData
-              ? requestBody
-              : JSON.stringify(requestBody),
+          body: requestBody instanceof FormData ? requestBody : JSON.stringify(requestBody),
         });
 
         if (!response.ok) {
@@ -169,7 +153,7 @@ export default function useAIResponseStream() {
         }
       }
     },
-    [],
+    []
   );
 
   return { streamResponse };

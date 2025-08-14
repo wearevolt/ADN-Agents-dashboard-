@@ -5,13 +5,7 @@ import { cn } from "@/lib/utils";
 import { ICONS } from "./constants";
 import { type IconProps } from "./types";
 
-const Icon: FC<IconProps> = ({
-  type,
-  size = "sm",
-  className,
-  color,
-  disabled = false,
-}) => {
+const Icon: FC<IconProps> = ({ type, size = "sm", className, color, disabled = false }) => {
   const IconElement = ICONS[type];
 
   return (
@@ -26,7 +20,7 @@ const Icon: FC<IconProps> = ({
         size === "md" && "size-[42px]",
         size === "lg" && "size-7",
         size === "dot" && "size-[5.07px]",
-        size === "default" && " ",
+        size === "default" && " "
       )}
     />
   );
