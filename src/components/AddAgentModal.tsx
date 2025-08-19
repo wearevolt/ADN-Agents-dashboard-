@@ -18,6 +18,7 @@ interface Agent {
   items?: string[];
   updatedTime?: string;
   isCustom?: boolean;
+  isLibraryAgent?: boolean;
   apiKey?: string;
   agentUrl?: string;
   webhookUrl?: string;

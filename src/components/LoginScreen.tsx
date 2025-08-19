@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCallback, useEffect, useState } from "react";
-import type { Container, Engine } from "tsparticles";
+import type { Container, Engine } from "tsparticles-engine";
 import { loadSlim } from "tsparticles-slim";
 import Particles from "react-tsparticles";
 
