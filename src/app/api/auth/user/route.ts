@@ -14,6 +14,8 @@ export async function GET(request: Request) {
     const user = verifyJwtToken(token);
 
     // Optional upstream validation (moneyball-style): call GraphQL `me`
+    let meId: string | undefined;
+    let meEmail: string | undefined;
     if (MAIN_USERINFO_URL) {
       const cookieHeader = request.headers.get("cookie") || "";
       const body = JSON.stringify({
@@ -63,11 +65,13 @@ export async function GET(request: Request) {
       if (!me) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }
+      meId = me?.id as string | undefined;
+      meEmail = me?.email as string | undefined;
     }
 
     return NextResponse.json({
-      id: user.id,
-      email: user.email,
+      id: meId || user.id,
+      email: meEmail || user.email,
       active: true,
       roles: user.roles ?? [],
       tenantId: user.tenantId ?? null,
