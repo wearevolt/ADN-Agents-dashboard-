@@ -17,22 +17,25 @@ export const GET = withAuth(async ({ request }) => {
   const tag = searchParams.get("tag");
   const where = {
     ...(type ? { toolType: type as any } : {}),
-    ...(tag ? { tags: { has: tag } } : {}),
+    ...(tag ? { toolTags: { some: { tag: { name: tag } } } } : {}),
   } as any;
   const items = await prisma.toolsRegistry.findMany({
     where,
     orderBy: { createdAt: "desc" },
-    select: {
-      id: true,
-      explicitCallName: true,
-      readableName: true,
-      toolType: true,
-      tags: true,
-      createdAt: true,
-      updatedAt: true,
+    include: {
+      toolTags: { include: { tag: { select: { id: true, name: true } } } },
     },
   });
-  return NextResponse.json(items);
+  const mapped = items.map((r) => ({
+    id: r.id,
+    explicitCallName: r.explicitCallName,
+    readableName: r.readableName,
+    toolType: r.toolType,
+    tags: r.toolTags.map((tt) => tt.tag),
+    createdAt: r.createdAt,
+    updatedAt: r.updatedAt,
+  }));
+  return NextResponse.json(mapped);
 });
 
 export const POST = withAuth(async ({ request, user }) => {
@@ -41,6 +44,7 @@ export const POST = withAuth(async ({ request, user }) => {
     explicit_call_name?: string;
     readable_name?: string;
     tool_type?: "HARD_CODED" | "N8N" | "DUST";
+    tag_ids?: string[];
   } | null;
   if (!body) return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
 
@@ -57,12 +61,21 @@ export const POST = withAuth(async ({ request, user }) => {
     toolType = "HARD_CODED";
   }
 
+  const tagIds = Array.isArray(body.tag_ids) ? body.tag_ids.map(String) : [];
+
   try {
+    if (tagIds.length) {
+      const existing = await prisma.tag.findMany({ where: { id: { in: tagIds } }, select: { id: true } });
+      const set = new Set(existing.map((t) => t.id));
+      const missing = tagIds.filter((id) => !set.has(id));
+      if (missing.length) return NextResponse.json({ error: "invalid_tag_ids" }, { status: 400 });
+    }
     const created = await prisma.toolsRegistry.create({
       data: {
         explicitCallName,
         readableName,
         toolType,
+        toolTags: tagIds.length ? { createMany: { data: tagIds.map((id) => ({ tagId: id })) } } : undefined,
       },
       select: { id: true },
     });

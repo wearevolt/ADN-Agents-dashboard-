@@ -1,7 +1,9 @@
 import { create } from "zustand";
 
+type TagItem = { id: string; name: string };
+
 type TagsState = {
-  tags: string[];
+  tags: TagItem[];
   loading: boolean;
   error: string | null;
   lastFetchedAt: number | null;
@@ -26,7 +28,7 @@ export const useTagsStore = create<TagsState>((set, get) => ({
       const res = await fetch("/api/tools/tags", { cache: "no-store" });
       if (!res.ok) throw new Error(String(res.status));
       const data = (await res.json()) as { id: string; name: string }[];
-      set({ tags: data.map((t) => t.name), loading: false, lastFetchedAt: now });
+      set({ tags: data, loading: false, lastFetchedAt: now });
     } catch (e: any) {
       set({ error: e?.message || String(e), loading: false, lastFetchedAt: now });
     }

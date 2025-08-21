@@ -19,6 +19,7 @@ import {
 interface Agent {
   id: string;
   name: string;
+  displayName?: string;
   type: "personal" | "team";
   description?: string;
   status: "active" | "error";
@@ -38,22 +39,22 @@ interface AddAgentModalProps {
   onClose: () => void;
   onAddAgent: (agent: {
     name: string;
+    displayName: string;
     apiKey: string;
     agentUrl: string;
     webhookUrl: string;
     description: string;
-    isPrivate: boolean;
     tags: AgentTag[];
   }) => void;
   onUpdateAgent?: (
     agentId: string,
     agent: {
       name: string;
+      displayName: string;
       apiKey: string;
       agentUrl: string;
       webhookUrl: string;
       description: string;
-      isPrivate: boolean;
       tags: AgentTag[];
     }
   ) => void;
@@ -71,14 +72,13 @@ export const AddAgentModal = ({
   // RBAC: fetch roles to determine admin access
   const { isAdmin } = useUserRoles();
 
-  // Deprecated in new model (kept for compatibility with parent handlers)
-  const [isPrivate, setIsPrivate] = useState(true);
   const [selectedTags, setSelectedTags] = useState<AgentTag[]>([]);
   const { tags: storeTags, fetchIfNeeded, forceRefresh } = useTagsStore();
-  const [availableTags, setAvailableTags] = useState<AgentTag[]>([]);
-  const toggleTag = (tag: AgentTag) => {
-    setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+  const [availableTags, setAvailableTags] = useState<{ id: string; name: string }[]>([]);
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const toggleTagId = (tagId: string) => {
+    setSelectedTagIds((prev) =>
+      prev.includes(tagId) ? prev.filter((t) => t !== tagId) : [...prev, tagId]
     );
   };
   // New form state (mapped to old handlers on submit for compatibility)
@@ -130,14 +130,12 @@ export const AddAgentModal = ({
     if (isOpen) {
       if (editingAgent) {
         // Определяем private status - если агент не находится в библиотеке команды, то он приватный
-        const isAgentPrivate = editingAgent.type === "personal" && !editingAgent.isLibraryAgent;
-        setIsPrivate(isAgentPrivate);
         setSelectedTags(editingAgent.tags || []);
         const baseName = editingAgent.name.startsWith("@")
           ? editingAgent.name.slice(1)
           : editingAgent.name;
         setExplicitName(baseName);
-        setDisplayName(baseName);
+        setDisplayName(editingAgent.displayName || baseName);
         setDescription(editingAgent.description || "");
         setFormData({
           name: baseName,
@@ -147,7 +145,6 @@ export const AddAgentModal = ({
           description: editingAgent.description || "",
         });
       } else {
-        setIsPrivate(true);
         setSelectedTags([]);
         setToolType(isAdmin ? "HARD_CODED" : "HARD_CODED");
         setExplicitName("");
@@ -206,8 +203,40 @@ export const AddAgentModal = ({
 
   // Load available tags via store
   useEffect(() => {
-    fetchIfNeeded().then(() => setAvailableTags(storeTags as AgentTag[]));
+    fetchIfNeeded().then(() => setAvailableTags(storeTags as { id: string; name: string }[]));
   }, [storeTags, fetchIfNeeded]);
+
+  // When editing, map existing tag names to ids once tags are available
+  useEffect(() => {
+    if (!editingAgent) return;
+    if (!Array.isArray(editingAgent.tags)) return;
+    if (!Array.isArray(availableTags) || availableTags.length === 0) return;
+    const nameToId = new Map(availableTags.map((t) => [t.name, t.id]));
+    const ids = (editingAgent.tags || [])
+      .map((name) => nameToId.get(name))
+      .filter((v): v is string => Boolean(v));
+    setSelectedTagIds(ids);
+  }, [editingAgent, availableTags]);
+
+  // Ensure readable name is loaded from server when missing in editing context
+  useEffect(() => {
+    if (!isOpen || !editingAgent) return;
+    if (editingAgent.displayName) return;
+    (async () => {
+      try {
+        const res = await fetch(`/api/tools/registry/${editingAgent.id}`, { cache: "no-store" });
+        if (!res.ok) return;
+        const data = (await res.json()) as {
+          readableName?: string;
+          toolType?: "HARD_CODED" | "N8N" | "DUST";
+        };
+        if (data?.readableName) setDisplayName(data.readableName);
+        if (data?.toolType) setToolType(data.toolType);
+      } catch {
+        // noop
+      }
+    })();
+  }, [isOpen, editingAgent]);
 
   const [errorText, setErrorText] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -233,16 +262,63 @@ export const AddAgentModal = ({
     }
 
     if (isEditing && editingAgent && onUpdateAgent) {
-      const nameWithAt = explicitName.startsWith("@") ? explicitName : `@${explicitName}`;
-      onUpdateAgent(editingAgent.id, {
-        name: nameWithAt,
-        apiKey: "",
-        agentUrl: toolType === "N8N" ? n8nExternalUrl : "",
-        webhookUrl: formData.webhookUrl,
-        description,
-        isPrivate: true,
-        tags: [],
-      });
+      try {
+        setSubmitting(true);
+        // Update registry (names + tags)
+        const regRes = await fetch(`/api/tools/registry/${editingAgent.id}`, {
+          method: "PATCH",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            explicit_call_name: explicitName.trim(),
+            readable_name: displayName.trim(),
+            tag_ids: selectedTagIds,
+          }),
+        });
+        if (regRes.status === 409) {
+          setErrorText("Explicit name is already taken");
+          setSubmitting(false);
+          return;
+        }
+        if (!regRes.ok) {
+          setErrorText("Failed to update tool");
+          setSubmitting(false);
+          return;
+        }
+
+        // Fetch tool type to decide if we should update hardcoded notes
+        const regInfo = await fetch(`/api/tools/registry/${editingAgent.id}`, {
+          cache: "no-store",
+        });
+        if (regInfo.ok) {
+          const data = (await regInfo.json()) as { toolType?: string };
+          if (data?.toolType === "HARD_CODED") {
+            // Update notes for hardcoded profile
+            await fetch(`/api/tools/hardcoded/${editingAgent.id}`, {
+              method: "PATCH",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({ notes: description || null }),
+            });
+          }
+        }
+
+        const nameWithAt = explicitName.startsWith("@") ? explicitName : `@${explicitName}`;
+        const updatedTagNames = availableTags
+          .filter((t) => selectedTagIds.includes(t.id))
+          .map((t) => t.name as AgentTag);
+        onUpdateAgent(editingAgent.id, {
+          name: nameWithAt,
+          displayName: displayName.trim(),
+          apiKey: "",
+          agentUrl: toolType === "N8N" ? n8nExternalUrl : "",
+          webhookUrl: formData.webhookUrl,
+          description,
+          tags: updatedTagNames,
+        });
+      } catch {
+        setErrorText("Network error");
+      } finally {
+        setSubmitting(false);
+      }
       return;
     }
 
@@ -250,7 +326,7 @@ export const AddAgentModal = ({
       setSubmitting(true);
       const profile =
         toolType === "HARD_CODED"
-          ? { notes: description || undefined, tags: selectedTags }
+          ? { notes: description || undefined }
           : toolType === "N8N"
             ? {
                 external_url: n8nExternalUrl.trim(),
@@ -260,7 +336,6 @@ export const AddAgentModal = ({
                 stream_if_single_tool: n8nStreamIfSingle,
                 flash_answer_needed: n8nFlashAnswerNeeded,
                 timeout_seconds: n8nTimeoutSeconds,
-                tags: selectedTags,
               }
             : {
                 dust_workspace_sid: dustWorkspaceSid.trim(),
@@ -272,7 +347,6 @@ export const AddAgentModal = ({
                 api_timeout_seconds: dustApiTimeout,
                 message_events_timeout_seconds: dustMsgEventsTimeout,
                 conversation_events_timeout_seconds: dustConvEventsTimeout,
-                tags: selectedTags,
               };
 
       const res = await fetch("/api/tools", {
@@ -282,6 +356,7 @@ export const AddAgentModal = ({
           explicit_call_name: explicitName.trim(),
           readable_name: displayName.trim(),
           tool_type: toolType,
+          tag_ids: selectedTagIds,
           profile,
         }),
       });
@@ -299,12 +374,14 @@ export const AddAgentModal = ({
       const nameWithAt = explicitName.startsWith("@") ? explicitName : `@${explicitName}`;
       onAddAgent({
         name: nameWithAt,
+        displayName: displayName.trim(),
         apiKey: "",
         agentUrl: toolType === "N8N" ? n8nExternalUrl : "",
         webhookUrl: formData.webhookUrl,
         description,
-        isPrivate: true,
-        tags: selectedTags,
+        tags: availableTags
+          .filter((t) => selectedTagIds.includes(t.id))
+          .map((t) => t.name as AgentTag),
       });
     } catch {
       setErrorText("Network error");
@@ -351,10 +428,16 @@ export const AddAgentModal = ({
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Tool type (ADMIN only) */}
+              {/* Tool type (ADMIN only, locked in edit mode) */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Tool type</label>
-                {isAdmin ? (
+                {isEditing ? (
+                  <div className="text-sm text-gray-600">
+                    {toolType === "HARD_CODED" && "Hardcoded"}
+                    {toolType === "N8N" && "N8N"}
+                    {toolType === "DUST" && "DUST"}
+                  </div>
+                ) : isAdmin ? (
                   <Select value={toolType} onValueChange={(v) => setToolType(v as any)}>
                     <SelectTrigger className="bg-white border-gray-300 text-gray-900">
                       <SelectValue placeholder="Select tool type" />
@@ -613,7 +696,7 @@ export const AddAgentModal = ({
                 />
               </div>
 
-              {/* Tags (hidden for MVP) */}
+              {/* Tags */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Tags (optional)
@@ -621,26 +704,26 @@ export const AddAgentModal = ({
                 <div className="flex flex-wrap gap-2">
                   {availableTags.map((tag) => (
                     <Button
-                      key={tag}
+                      key={tag.id}
                       type="button"
                       variant="outline"
                       size="sm"
                       className={`text-xs px-2 py-1 h-7 ${
-                        selectedTags.includes(tag)
+                        selectedTagIds.includes(tag.id)
                           ? "bg-blue-50 border-blue-300 text-blue-700 hover:bg-blue-100 hover:border-blue-400 hover:text-blue-700"
                           : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
                       }`}
-                      onClick={() => toggleTag(tag)}
+                      onClick={() => toggleTagId(tag.id)}
                     >
-                      {selectedTags.includes(tag) ? (
+                      {selectedTagIds.includes(tag.id) ? (
                         <>
                           <Check className="h-3 w-3 mr-1" />
-                          {tag}
+                          {tag.name}
                         </>
                       ) : (
                         <>
                           <Plus className="h-3 w-3 mr-1" />
-                          {tag}
+                          {tag.name}
                         </>
                       )}
                     </Button>

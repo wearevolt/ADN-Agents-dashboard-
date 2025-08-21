@@ -61,9 +61,10 @@ model SecurityKey {
 // ---------- Tags dictionary (options for UI filtering) ----------
 
 model Tag {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  createdAt DateTime @default(now()) @map("created_at")
+  id        String             @id @default(cuid())
+  name      String             @unique
+  createdAt DateTime           @default(now()) @map("created_at")
+  toolTags  ToolsRegistryTag[]
 
   @@map("tags")
 }
@@ -75,15 +76,28 @@ model ToolsRegistry {
   explicitCallName String   @unique @map("explicit_call_name")
   readableName     String   @map("readable_name")
   toolType         ToolType @map("tool_type")
-  tags             String[] @default([])
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
 
   hardcoded HardcodedTool?
   n8n       N8NTool?
   dust      DustTool?
+  toolTags  ToolsRegistryTag[]
 
   @@map("tools_registry")
+}
+
+// ---------- M:N relation between ToolsRegistry and Tag ----------
+
+model ToolsRegistryTag {
+  toolId String @map("tool_id")
+  tagId  String @map("tag_id")
+
+  tool ToolsRegistry @relation(fields: [toolId], references: [id], onDelete: Cascade)
+  tag  Tag           @relation(fields: [tagId], references: [id], onDelete: Restrict)
+
+  @@id([toolId, tagId])
+  @@map("tools_registry_tags")
 }
 
 // ---------- Tool profiles (1:1 with ToolsRegistry) ----------

@@ -17,6 +17,7 @@ export const POST = withAuth(async ({ request, user }) => {
       explicit_call_name?: string;
       readable_name?: string;
       tool_type?: "HARD_CODED" | "N8N" | "DUST";
+      tag_ids?: string[];
       profile?: Record<string, unknown>;
     }
     | null;
@@ -26,6 +27,7 @@ export const POST = withAuth(async ({ request, user }) => {
   const readableName = String(body.readable_name || "").trim();
   let toolType = (body.tool_type as any) || "HARD_CODED";
   const profile = (body.profile || {}) as Record<string, any>;
+  const tagIds = Array.isArray(body.tag_ids) ? body.tag_ids.map(String) : [];
 
   if (!explicitCallName || !readableName) {
     return NextResponse.json({ error: "missing_fields" }, { status: 400 });
@@ -51,8 +53,24 @@ export const POST = withAuth(async ({ request, user }) => {
 
   try {
     const result = await prisma.$transaction(async (tx) => {
+      // Validate tag IDs if provided
+      if (tagIds.length > 0) {
+        const existing = await tx.tag.findMany({ where: { id: { in: tagIds } }, select: { id: true } });
+        const existingIds = new Set(existing.map((t) => t.id));
+        const missing = tagIds.filter((id) => !existingIds.has(id));
+        if (missing.length > 0) {
+          throw Object.assign(new Error("invalid_tag_ids"), { code: "INVALID_TAGS" });
+        }
+      }
       const reg = await tx.toolsRegistry.create({
-        data: { explicitCallName, readableName, toolType, tags: Array.isArray((profile as any).tags) ? (profile as any).tags.map(String) : [] },
+        data: {
+          explicitCallName,
+          readableName,
+          toolType,
+          toolTags: tagIds.length
+            ? { createMany: { data: tagIds.map((id) => ({ tagId: id })) } }
+            : undefined,
+        },
         select: { id: true, toolType: true },
       });
 
@@ -94,6 +112,9 @@ export const POST = withAuth(async ({ request, user }) => {
     return NextResponse.json({ id: result.id }, { status: 201 });
   } catch (e: any) {
     const isUnique = (e?.meta as any)?.target?.includes("explicit_call_name");
+    if (e?.code === "INVALID_TAGS") {
+      return NextResponse.json({ error: "invalid_tag_ids" }, { status: 400 });
+    }
     return NextResponse.json({ error: isUnique ? "explicit_call_name_conflict" : "create_failed" }, { status: isUnique ? 409 : 500 });
   }
 });

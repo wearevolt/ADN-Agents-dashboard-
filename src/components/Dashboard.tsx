@@ -28,6 +28,7 @@ const getRandomTags = (available: AgentTag[]): AgentTag[] => {
 interface Agent {
   id: string;
   name: string;
+  displayName?: string;
   type: "personal" | "team";
   description?: string;
   status: "active" | "error";
@@ -35,9 +36,6 @@ interface Agent {
   items?: string[];
   updatedTime?: string;
   isCustom?: boolean;
-  apiKey?: string;
-  agentUrl?: string;
-  webhookUrl?: string;
   createdBy?: string; // Email создателя агента
   isLibraryAgent?: boolean; // Флаг для определения, является ли агент библиотечным
   tags?: AgentTag[]; // Теги агента
@@ -46,6 +44,7 @@ interface Agent {
 interface LibraryAgent {
   id: string;
   name: string;
+  displayName?: string;
   description: string;
   category: "Analysis" | "Metrics";
   emoji: string;
@@ -103,12 +102,13 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
         const mapped: Agent[] = (registry as any[]).map((r) => ({
           id: r.id,
           name: `@${r.explicitCallName}`,
+          displayName: r.readableName,
           type: "personal",
           status: "active",
           description:
             r.toolType === "HARD_CODED" ? notesById.get(r.id) || "" : `${r.toolType} tool`,
           isCustom: true,
-          tags: getRandomTags(storeTags as AgentTag[]),
+          tags: Array.isArray(r.tags) ? (r.tags as any[]).map((t: any) => t.name) : [],
         }));
         setAgents(mapped);
       } catch {
@@ -178,45 +178,26 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
 
   const handleAddAgent = (newAgent: {
     name: string;
+    displayName: string;
     apiKey: string;
     agentUrl: string;
     webhookUrl: string;
     description: string;
-    isPrivate: boolean;
     tags: AgentTag[];
   }) => {
     const agent: Agent = {
       id: Date.now().toString(),
       name: newAgent.name,
+      displayName: newAgent.displayName,
       description: newAgent.description,
       type: "personal",
       status: "active",
       isCustom: true,
-      apiKey: newAgent.apiKey,
-      agentUrl: newAgent.agentUrl,
-      webhookUrl: newAgent.webhookUrl,
       createdBy: user.email,
-      isLibraryAgent: !newAgent.isPrivate, // Если не приватный, то должен быть библиотечным
       tags: newAgent.tags,
     };
 
     setAgents([agent, ...agents]);
-
-    // Если агент не приватный, добавляем его в библиотеку команды
-    if (!newAgent.isPrivate) {
-      const libraryAgent: LibraryAgent = {
-        id: "custom-" + Date.now().toString(),
-        name: newAgent.name,
-        description: newAgent.description,
-        category: "Analysis", // Можно добавить выбор категории в будущем
-        emoji: "🤖",
-        createdBy: user.name,
-        tags: newAgent.tags,
-      };
-
-      // Добавляем в массив библиотечных агентов
-      setLibraryAgents([...libraryAgents, libraryAgent]);
-    }
 
     // Clear editing state after successful creation
     setEditingAgent(null);
@@ -293,11 +274,11 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
     agentId: string,
     updatedAgent: {
       name: string;
+      displayName: string;
       apiKey: string;
       agentUrl: string;
       webhookUrl: string;
       description: string;
-      isPrivate: boolean;
       tags: AgentTag[];
     }
   ) => {
@@ -311,55 +292,15 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
           ? {
               ...agent,
               name: updatedAgent.name,
+              displayName: updatedAgent.displayName,
               description: updatedAgent.description,
-              apiKey: updatedAgent.apiKey,
-              agentUrl: updatedAgent.agentUrl,
-              webhookUrl: updatedAgent.webhookUrl,
-              isLibraryAgent: !updatedAgent.isPrivate,
               tags: updatedAgent.tags,
             }
           : agent
       )
     );
 
-    // Управление библиотечными агентами
-    if (!updatedAgent.isPrivate) {
-      // Если агент стал не приватным, добавляем/обновляем в библиотеке
-      const existingLibraryAgent = libraryAgents.find((lib) => lib.name === updatedAgent.name);
-      if (existingLibraryAgent) {
-        // Обновляем существующего библиотечного агента
-        setLibraryAgents(
-          libraryAgents.map((lib) =>
-            lib.name === updatedAgent.name
-              ? {
-                  ...lib,
-                  description: updatedAgent.description,
-                  tags: updatedAgent.tags,
-                }
-              : lib
-          )
-        );
-      } else {
-        // Создаем нового библиотечного агента
-        const libraryAgent: LibraryAgent = {
-          id: "custom-" + Date.now().toString(),
-          name: updatedAgent.name,
-          description: updatedAgent.description,
-          category: "Analysis",
-          emoji: "🤖",
-          createdBy: user.name,
-          tags: updatedAgent.tags,
-        };
-        setLibraryAgents([...libraryAgents, libraryAgent]);
-      }
-    } else {
-      // Если агент стал приватным, удаляем из библиотеки (если он там был)
-      setLibraryAgents(
-        libraryAgents.filter(
-          (lib) => lib.name !== updatedAgent.name || !lib.id.startsWith("custom-")
-        )
-      );
-    }
+    // Team Library sync removed for MVP
 
     // Clear editing state after successful update
     setEditingAgent(null);
@@ -563,25 +504,25 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
             <h3 className="text-sm font-medium text-gray-900">Filter by tags</h3>
 
             <div className="flex flex-wrap gap-2">
-              {(storeTags as AgentTag[]).map((tag) => (
+              {(storeTags as any[]).map((tag: any) => (
                 <Button
-                  key={tag}
+                  key={tag.id}
                   variant="outline"
                   size="sm"
                   className={`text-xs px-3 py-1 h-8 ${
-                    selectedTagsFilter.includes(tag)
+                    selectedTagsFilter.includes(tag.name)
                       ? "bg-blue-50 border-blue-300 text-blue-700 hover:bg-blue-100 hover:border-blue-400"
                       : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
                   }`}
-                  onClick={() => handleTagFilterToggle(tag)}
+                  onClick={() => handleTagFilterToggle(tag.name)}
                 >
-                  {selectedTagsFilter.includes(tag) ? (
+                  {selectedTagsFilter.includes(tag.name) ? (
                     <>
                       <Check className="h-3 w-3 mr-1" />
-                      {tag}
+                      {tag.name}
                     </>
                   ) : (
-                    tag
+                    tag.name
                   )}
                 </Button>
               ))}

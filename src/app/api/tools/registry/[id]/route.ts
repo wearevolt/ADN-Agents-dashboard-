@@ -15,17 +15,20 @@ export const GET = withAuth(async ({ request }) => {
   if (!id) return NextResponse.json({ error: "Not found" }, { status: 404 });
   const item = await prisma.toolsRegistry.findUnique({
     where: { id },
-    select: {
-      id: true,
-      explicitCallName: true,
-      readableName: true,
-      toolType: true,
-      createdAt: true,
-      updatedAt: true,
+    include: {
+      toolTags: { include: { tag: { select: { id: true, name: true } } } },
     },
   });
   if (!item) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json(item);
+  return NextResponse.json({
+    id: item.id,
+    explicitCallName: item.explicitCallName,
+    readableName: item.readableName,
+    toolType: item.toolType,
+    tags: item.toolTags.map((tt) => tt.tag),
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt,
+  });
 });
 
 export const PATCH = withAuth(async ({ request, user }) => {
@@ -34,6 +37,7 @@ export const PATCH = withAuth(async ({ request, user }) => {
   const body = await request.json().catch(() => null) as {
     explicit_call_name?: string;
     readable_name?: string;
+    tag_ids?: string[];
     // tool_type changes are not allowed in MVP
   } | null;
   if (!body) return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
@@ -45,13 +49,32 @@ export const PATCH = withAuth(async ({ request, user }) => {
 
   // Both ADMIN and USER can edit Hardcoded-only related fields on registry (name/label)
   try {
-    const updated = await prisma.toolsRegistry.update({
-      where: { id },
-      data: {
-        explicitCallName: body.explicit_call_name?.trim() || undefined,
-        readableName: body.readable_name?.trim() || undefined,
-      },
-      select: { id: true },
+    const tagIds = Array.isArray(body.tag_ids) ? body.tag_ids.map(String) : undefined;
+    if (tagIds) {
+      const existing = await prisma.tag.findMany({ where: { id: { in: tagIds } }, select: { id: true } });
+      const set = new Set(existing.map((t) => t.id));
+      const missing = tagIds.filter((tid) => !set.has(tid));
+      if (missing.length) return NextResponse.json({ error: "invalid_tag_ids" }, { status: 400 });
+    }
+    const updated = await prisma.$transaction(async (tx) => {
+      const u = await tx.toolsRegistry.update({
+        where: { id },
+        data: {
+          explicitCallName: body.explicit_call_name?.trim() || undefined,
+          readableName: body.readable_name?.trim() || undefined,
+        },
+        select: { id: true },
+      });
+      if (tagIds) {
+        await tx.toolsRegistryTag.deleteMany({ where: { toolId: id } });
+        if (tagIds.length) {
+          await tx.toolsRegistryTag.createMany({
+            data: tagIds.map((tid) => ({ toolId: id, tagId: tid })),
+            skipDuplicates: true,
+          });
+        }
+      }
+      return u;
     });
     return NextResponse.json(updated);
   } catch (e: any) {
