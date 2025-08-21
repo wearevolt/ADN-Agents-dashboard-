@@ -1,0 +1,123 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Enums ----------
+
+enum ToolType {
+  HARD_CODED
+  N8N
+  DUST
+}
+
+// ---------- RBAC ----------
+
+model Role {
+  id          String     @id @default(cuid())
+  name        String     @unique
+  description String?
+  userRoles   UserRole[]
+
+  @@map("roles")
+}
+
+model UserRole {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id") // matches CurrentUser.id (string)
+  orgId     String?  @map("org_id")  // nullable if multi-tenancy is not used
+  roleId    String   @map("role_id")
+  role      Role     @relation(fields: [roleId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([userId, roleId, orgId], name: "user_id_role_id_org_id")
+  @@map("user_roles")
+}
+
+// ---------- Security Keys ----------
+
+model SecurityKey {
+  id               String    @id @default(cuid())
+  systemName       String    @unique @map("system_name")
+  description      String?
+  orgId            String?   @map("org_id")
+  createdByUserId  String?   @map("created_by_user_id")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+  n8nTools         N8NTool[]
+  dustTools        DustTool[]
+
+  @@map("security_keys")
+}
+
+// ---------- Tools Registry (single namespace for explicit_call_name) ----------
+
+model ToolsRegistry {
+  id               String        @id @default(cuid())
+  explicitCallName String        @unique @map("explicit_call_name")
+  readableName     String        @map("readable_name")
+  toolType         ToolType      @map("tool_type")
+  isEnabled        Boolean       @default(true) @map("is_enabled")
+  orgId            String?       @map("org_id")
+  ownerUserId      String?       @map("owner_user_id")
+  createdAt        DateTime      @default(now()) @map("created_at")
+  updatedAt        DateTime      @updatedAt @map("updated_at")
+
+  hardcoded       HardcodedTool?
+  n8n             N8NTool?
+  dust            DustTool?
+
+  @@map("tools_registry")
+}
+
+// ---------- Tool profiles (1:1 with ToolsRegistry) ----------
+
+model HardcodedTool {
+  id        String        @id
+  registry  ToolsRegistry @relation(fields: [id], references: [id], onDelete: Cascade)
+  notes     String?
+
+  @@map("hardcoded_tools")
+}
+
+model N8NTool {
+  id                   String        @id
+  registry             ToolsRegistry @relation(fields: [id], references: [id], onDelete: Cascade)
+  returnDirect         Boolean       @default(false) @map("return_direct")
+  isIsolated           Boolean       @default(false) @map("is_isolated")
+  streamIfSingleTool   Boolean       @default(false) @map("stream_if_single_tool")
+  flashAnswerNeeded    Boolean       @default(false) @map("flash_answer_needed")
+  timeoutSeconds       Int           @default(30) @map("timeout_seconds")
+  externalUrl          String        @map("external_url")
+  securityKeyId        String        @map("security_key_id")
+  securityKey          SecurityKey   @relation(fields: [securityKeyId], references: [id], onDelete: Restrict)
+
+  @@map("n8n_tools")
+}
+
+model DustTool {
+  id                               String        @id
+  registry                         ToolsRegistry @relation(fields: [id], references: [id], onDelete: Cascade)
+  returnDirect                     Boolean       @default(false) @map("return_direct")
+  isIsolated                       Boolean       @default(false) @map("is_isolated")
+  streamIfSingleTool               Boolean       @default(false) @map("stream_if_single_tool")
+  dustWorkspaceSid                 String        @map("dust_workspace_sid")
+  dustAgentSid                     String        @map("dust_agent_sid")
+  apiTimeoutSeconds                Int           @default(30) @map("api_timeout_seconds")
+  messageEventsTimeoutSeconds      Int           @default(180) @map("message_events_timeout_seconds")
+  conversationEventsTimeoutSeconds Int           @default(30) @map("conversation_events_timeout_seconds")
+  securityKeyId                    String        @map("security_key_id")
+  securityKey                      SecurityKey   @relation(fields: [securityKeyId], references: [id], onDelete: Restrict)
+
+  @@map("dust_tools")
+}

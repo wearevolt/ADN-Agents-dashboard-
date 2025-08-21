@@ -1171,7 +1171,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
         description={`Are you sure you want to delete this agent? This action cannot be undone.`}
         confirmText="Delete"
         cancelText="Cancel"
-        variant="destructive"
+        variant="danger"
       />
     </div>
   );
