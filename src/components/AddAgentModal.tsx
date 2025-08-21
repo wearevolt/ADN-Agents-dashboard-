@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Copy, Clipboard, Plus, Check } from "lucide-react";
+import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
-import { AgentTag, AVAILABLE_TAGS } from "./Dashboard";
+import { AgentTag } from "./Dashboard";
+import { useUserRoles } from "@/hooks/useUserRoles";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
 interface Agent {
   id: string;
@@ -60,8 +61,44 @@ export const AddAgentModal = ({
   editingAgent,
 }: AddAgentModalProps) => {
   const isEditing = !!editingAgent;
+  // RBAC: fetch roles to determine admin access
+  const { isAdmin } = useUserRoles();
+
+  // Deprecated in new model (kept for compatibility with parent handlers)
   const [isPrivate, setIsPrivate] = useState(true);
   const [selectedTags, setSelectedTags] = useState<AgentTag[]>([]);
+  // New form state (mapped to old handlers on submit for compatibility)
+  const [toolType, setToolType] = useState<"HARD_CODED" | "N8N" | "DUST">("HARD_CODED");
+  const [explicitName, setExplicitName] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [isEnabled, setIsEnabled] = useState(true);
+  const [description, setDescription] = useState("");
+
+  // N8N specific
+  const [n8nExternalUrl, setN8nExternalUrl] = useState("");
+  const [n8nSecurityKeyId, setN8nSecurityKeyId] = useState<string>("");
+  const [n8nReturnDirect, setN8nReturnDirect] = useState(false);
+  const [n8nIsIsolated, setN8nIsIsolated] = useState(false);
+  const [n8nStreamIfSingle, setN8nStreamIfSingle] = useState(false);
+  const [n8nFlashAnswerNeeded, setN8nFlashAnswerNeeded] = useState(false);
+  const [n8nTimeoutSeconds, setN8nTimeoutSeconds] = useState<number>(30);
+
+  // Dust specific
+  const [dustWorkspaceSid, setDustWorkspaceSid] = useState("");
+  const [dustAgentSid, setDustAgentSid] = useState("");
+  const [dustSecurityKeyId, setDustSecurityKeyId] = useState<string>("");
+  const [dustReturnDirect, setDustReturnDirect] = useState(false);
+  const [dustIsIsolated, setDustIsIsolated] = useState(false);
+  const [dustStreamIfSingle, setDustStreamIfSingle] = useState(false);
+  const [dustApiTimeout, setDustApiTimeout] = useState<number>(30);
+  const [dustMsgEventsTimeout, setDustMsgEventsTimeout] = useState<number>(180);
+  const [dustConvEventsTimeout, setDustConvEventsTimeout] = useState<number>(30);
+
+  // Security Keys for admin (N8N/DUST)
+  const [securityKeys, setSecurityKeys] = useState<{ id: string; system_name: string }[]>([]);
+  const [securityKeysLoading, setSecurityKeysLoading] = useState(false);
+
+  // Legacy fields preserved for compatibility with parent props
   const [formData, setFormData] = useState({
     name: "",
     apiKey: "",
@@ -83,9 +120,13 @@ export const AddAgentModal = ({
         const isAgentPrivate = editingAgent.type === "personal" && !editingAgent.isLibraryAgent;
         setIsPrivate(isAgentPrivate);
         setSelectedTags(editingAgent.tags || []);
+        const baseName = editingAgent.name.startsWith("@") ? editingAgent.name.slice(1) : editingAgent.name;
+        setExplicitName(baseName);
+        setDisplayName(baseName);
+        setDescription(editingAgent.description || "");
         setFormData({
-          name: editingAgent.name.startsWith("@") ? editingAgent.name.slice(1) : editingAgent.name,
-          apiKey: editingAgent.apiKey || "", // Keep existing API key
+          name: baseName,
+          apiKey: editingAgent.apiKey || "",
           agentUrl: editingAgent.agentUrl || "",
           webhookUrl: editingAgent.webhookUrl || "https://link_id1234.webhook.com",
           description: editingAgent.description || "",
@@ -93,6 +134,28 @@ export const AddAgentModal = ({
       } else {
         setIsPrivate(true);
         setSelectedTags([]);
+        setToolType(isAdmin ? "HARD_CODED" : "HARD_CODED");
+        setExplicitName("");
+        setDisplayName("");
+        setIsEnabled(true);
+        setDescription("");
+        // Reset type-specific fields
+        setN8nExternalUrl("");
+        setN8nSecurityKeyId("");
+        setN8nReturnDirect(false);
+        setN8nIsIsolated(false);
+        setN8nStreamIfSingle(false);
+        setN8nFlashAnswerNeeded(false);
+        setN8nTimeoutSeconds(30);
+        setDustWorkspaceSid("");
+        setDustAgentSid("");
+        setDustSecurityKeyId("");
+        setDustReturnDirect(false);
+        setDustIsIsolated(false);
+        setDustStreamIfSingle(false);
+        setDustApiTimeout(30);
+        setDustMsgEventsTimeout(180);
+        setDustConvEventsTimeout(30);
         setFormData({
           name: "",
           apiKey: "",
@@ -104,50 +167,60 @@ export const AddAgentModal = ({
     }
   }, [editingAgent, isOpen]);
 
+  // Load security keys for admin when needed
+  useEffect(() => {
+    if (!isAdmin) return;
+    if (!(toolType === "N8N" || toolType === "DUST")) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        setSecurityKeysLoading(true);
+        const res = await fetch("/api/tools/security-keys", { cache: "no-store" });
+        if (!res.ok) throw new Error(String(res.status));
+        const list = (await res.json()) as { id: string; system_name: string }[];
+        if (!cancelled) setSecurityKeys(list || []);
+      } catch {
+        if (!cancelled) setSecurityKeys([]);
+      } finally {
+        if (!cancelled) setSecurityKeysLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isAdmin, toolType]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.name && formData.apiKey && formData.agentUrl) {
-      const nameWithAt = formData.name.startsWith("@") ? formData.name : `@${formData.name}`;
+    // Basic validation for new fields
+    if (!explicitName.trim() || !displayName.trim()) return;
+
+    const nameWithAt = explicitName.startsWith("@") ? explicitName : `@${explicitName}`;
+
+    // Map new-form data to legacy handler shape for compatibility with current Dashboard
+    const mapped = {
+      name: nameWithAt,
+      apiKey: "", // not used anymore
+      agentUrl: toolType === "N8N" ? n8nExternalUrl : "",
+      webhookUrl: formData.webhookUrl,
+      description: description,
+      isPrivate: true, // Private/Tags removed in MVP, keep default for parent expectations
+      tags: [] as AgentTag[],
+    };
+
       if (isEditing && editingAgent && onUpdateAgent) {
-        onUpdateAgent(editingAgent.id, {
-          ...formData,
-          name: nameWithAt,
-          isPrivate,
-          tags: selectedTags,
-        });
+      onUpdateAgent(editingAgent.id, mapped);
       } else {
-        onAddAgent({
-          ...formData,
-          name: nameWithAt,
-          isPrivate,
-          tags: selectedTags,
-        });
+      onAddAgent(mapped);
       }
       // Don't reset form data or close modal here - parent component handles it
-    }
   };
 
   const copyWebhookUrl = () => {
     navigator.clipboard.writeText(formData.webhookUrl);
   };
 
-  const pasteApiKey = async () => {
-    try {
-      const text = await navigator.clipboard.readText();
-      setFormData({ ...formData, apiKey: text });
-    } catch (err) {
-      console.error("Failed to paste: ", err);
-    }
-  };
-
-  const pasteAgentUrl = async () => {
-    try {
-      const text = await navigator.clipboard.readText();
-      setFormData({ ...formData, agentUrl: text });
-    } catch (err) {
-      console.error("Failed to paste: ", err);
-    }
-  };
+  // Clipboard helpers no longer required for API key / Agent URL in hardcoded
 
   // Функции управления тегами
   const handleTagToggle = (tag: AgentTag) => {
@@ -175,7 +248,7 @@ export const AddAgentModal = ({
           >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-gray-900">
-                {isEditing ? "Edit agent" : "Create new agent"}
+                {isEditing ? "Edit tool" : "Create new tool"}
               </h2>
               <Button variant="ghost" size="icon" onClick={onClose} className="hover:bg-gray-100">
                 <X className="h-4 w-4 text-gray-600" />
@@ -183,161 +256,207 @@ export const AddAgentModal = ({
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Private Agent Toggle */}
-              <div className="flex items-center">
-                <label className="block text-sm font-medium text-gray-700 mb-1 mr-2">Private</label>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={isPrivate}
-                    onChange={(e) => setIsPrivate(e.target.checked)}
-                    className="sr-only"
-                  />
-                  <div
-                    className={`w-11 h-6 rounded-full transition-colors flex items-center ${isPrivate ? "bg-blue-600" : "bg-gray-200"}`}
-                  >
-                    <div
-                      className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${isPrivate ? "translate-x-5" : "translate-x-0.5"}`}
-                    ></div>
-                  </div>
-                </label>
+              {/* Tool type (ADMIN only) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tool type</label>
+                {isAdmin ? (
+                  <Select value={toolType} onValueChange={(v) => setToolType(v as any)}>
+                    <SelectTrigger className="bg-white border-gray-300 text-gray-900">
+                      <SelectValue placeholder="Select tool type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="HARD_CODED">Hardcoded</SelectItem>
+                      <SelectItem value="N8N">N8N</SelectItem>
+                      <SelectItem value="DUST">DUST</SelectItem>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <div className="text-sm text-gray-600">Hardcoded</div>
+                )}
               </div>
 
-              {/* Agent Name */}
+              {/* Explicit name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Agent name *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Explicit name *</label>
                 <div className="relative">
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-900 font-medium">
                     @
                   </div>
                   <Input
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Add name for agent"
+                    value={explicitName}
+                    onChange={(e) => setExplicitName(e.target.value)}
+                    placeholder="explicit_call_name"
                     className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-gray-400 pl-8"
                     required
                   />
                 </div>
               </div>
 
-              {/* API Key */}
+              {/* Display name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">API key *</label>
-                <div className="relative">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Display name *</label>
                   <Input
-                    value={formData.apiKey}
-                    onChange={(e) => setFormData({ ...formData, apiKey: e.target.value })}
-                    placeholder="Add API key"
-                    className="pr-10 bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-gray-400"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  placeholder="Readable name"
+                  className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-gray-400"
                     required
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 hover:bg-gray-100"
-                    onClick={pasteApiKey}
-                  >
-                    <Clipboard className="h-3 w-3 text-gray-600" />
-                  </Button>
-                </div>
+                />
               </div>
 
-              {/* Agent URL */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Agent URL *</label>
-                <div className="relative">
-                  <Input
-                    value={formData.agentUrl}
-                    onChange={(e) => setFormData({ ...formData, agentUrl: e.target.value })}
-                    placeholder="Add Agent URL"
-                    className="pr-10 bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-gray-400"
-                    required
+              {/* Enable switch */}
+              <div className="flex items-center">
+                <label className="block text-sm font-medium text-gray-700 mb-1 mr-2">Enabled</label>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isEnabled}
+                    onChange={(e) => setIsEnabled(e.target.checked)}
+                    className="sr-only"
                   />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 hover:bg-gray-100"
-                    onClick={pasteAgentUrl}
-                  >
-                    <Clipboard className="h-3 w-3 text-gray-600" />
-                  </Button>
+                  <div className={`w-11 h-6 rounded-full transition-colors flex items-center ${isEnabled ? "bg-blue-600" : "bg-gray-200"}`}>
+                    <div className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${isEnabled ? "translate-x-5" : "translate-x-0.5"}`}></div>
                 </div>
-              </div>
-
-              {/* Webhook URL */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Webhook URL *
                 </label>
-                <div className="relative">
-                  <Input
-                    value={formData.webhookUrl}
-                    onChange={(e) => setFormData({ ...formData, webhookUrl: e.target.value })}
-                    className="pr-10 bg-gray-100 border-gray-300 text-gray-700 placeholder-gray-500 cursor-not-allowed"
-                    readOnly
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 hover:bg-gray-100"
-                    onClick={copyWebhookUrl}
-                  >
-                    <Copy className="h-3 w-3 text-gray-600" />
-                  </Button>
-                </div>
               </div>
 
-              {/* Description */}
+              {/* N8N Specific (ADMIN) */}
+              {toolType === "N8N" && (
+                <div className="space-y-4">
+              <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">External URL *</label>
+                  <Input
+                      value={n8nExternalUrl}
+                      onChange={(e) => setN8nExternalUrl(e.target.value)}
+                      placeholder="https://..."
+                      className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-gray-400"
+                    required
+                  />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Security Key *</label>
+                    <Select value={n8nSecurityKeyId} onValueChange={setN8nSecurityKeyId}>
+                      <SelectTrigger className="bg-white border-gray-300 text-gray-900">
+                        <SelectValue placeholder={securityKeysLoading ? "Loading..." : "Select key"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {securityKeys.map((k) => (
+                          <SelectItem key={k.id} value={k.id}>{k.system_name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <label className="flex items-center gap-2 text-sm text-gray-700">
+                      <input type="checkbox" checked={n8nReturnDirect} onChange={(e) => setN8nReturnDirect(e.target.checked)} />
+                      Return direct
+                    </label>
+                    <label className="flex items-center gap-2 text-sm text-gray-700">
+                      <input type="checkbox" checked={n8nIsIsolated} onChange={(e) => setN8nIsIsolated(e.target.checked)} />
+                      Is isolated
+                    </label>
+                    <label className="flex items-center gap-2 text-sm text-gray-700">
+                      <input type="checkbox" checked={n8nStreamIfSingle} onChange={(e) => setN8nStreamIfSingle(e.target.checked)} />
+                      Stream if single tool
+                    </label>
+                    <label className="flex items-center gap-2 text-sm text-gray-700">
+                      <input type="checkbox" checked={n8nFlashAnswerNeeded} onChange={(e) => setN8nFlashAnswerNeeded(e.target.checked)} />
+                      Flash answer needed
+                    </label>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Timeout seconds</label>
+                    <Input
+                      value={String(n8nTimeoutSeconds)}
+                      onChange={(e) => setN8nTimeoutSeconds(Number(e.target.value || 0))}
+                      type="number"
+                      min={1}
+                      className="bg-white border-gray-300 text-gray-900 focus:border-gray-400"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* DUST Specific (ADMIN) */}
+              {toolType === "DUST" && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Dust workspace SID *</label>
+                    <Input
+                      value={dustWorkspaceSid}
+                      onChange={(e) => setDustWorkspaceSid(e.target.value)}
+                      placeholder="workspace_sid"
+                      className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-gray-400"
+                      required
+                    />
+              </div>
+              <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Dust agent SID *</label>
+                  <Input
+                      value={dustAgentSid}
+                      onChange={(e) => setDustAgentSid(e.target.value)}
+                      placeholder="agent_sid"
+                      className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-gray-400"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Security Key *</nlabel>
+                    <Select value={dustSecurityKeyId} onValueChange={setDustSecurityKeyId}>
+                      <SelectTrigger className="bg-white border-gray-300 text-gray-900">
+                        <SelectValue placeholder={securityKeysLoading ? "Loading..." : "Select key"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {securityKeys.map((k) => (
+                          <SelectItem key={k.id} value={k.id}>{k.system_name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <label className="flex items-center gap-2 text-sm text-gray-700">
+                      <input type="checkbox" checked={dustReturnDirect} onChange={(e) => setDustReturnDirect(e.target.checked)} />
+                      Return direct
+                    </label>
+                    <label className="flex items-center gap-2 text-sm text-gray-700">
+                      <input type="checkbox" checked={dustIsIsolated} onChange={(e) => setDustIsIsolated(e.target.checked)} />
+                      Is isolated
+                    </label>
+                    <label className="flex items-center gap-2 text-sm text-gray-700">
+                      <input type="checkbox" checked={dustStreamIfSingle} onChange={(e) => setDustStreamIfSingle(e.target.checked)} />
+                      Stream if single tool
+                    </label>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">API timeout (s)</label>
+                      <Input type="number" min={1} value={String(dustApiTimeout)} onChange={(e) => setDustApiTimeout(Number(e.target.value || 0))} />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Message events (s)</label>
+                      <Input type="number" min={1} value={String(dustMsgEventsTimeout)} onChange={(e) => setDustMsgEventsTimeout(Number(e.target.value || 0))} />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Conversation events (s)</label>
+                      <Input type="number" min={1} value={String(dustConvEventsTimeout)} onChange={(e) => setDustConvEventsTimeout(Number(e.target.value || 0))} />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Description (Hardcoded + others) */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Add agent description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Add description"
                   rows={3}
                   className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-gray-900 placeholder-gray-500"
                 />
               </div>
 
-              {/* Tags */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tags (optional)
-                </label>
-
-                {/* Available Tags */}
-                <div className="flex flex-wrap gap-2">
-                  {AVAILABLE_TAGS.map((tag) => (
-                    <Button
-                      key={tag}
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className={`text-xs px-2 py-1 h-7 ${
-                        selectedTags.includes(tag)
-                          ? "bg-blue-50 border-blue-300 text-blue-700 hover:bg-blue-100 hover:border-blue-400 hover:text-blue-700"
-                          : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
-                      }`}
-                      onClick={() => handleTagToggle(tag)}
-                    >
-                      {selectedTags.includes(tag) ? (
-                        <>
-                          <Check className="h-3 w-3 mr-1" />
-                          {tag}
-                        </>
-                      ) : (
-                        <>
-                          <Plus className="h-3 w-3 mr-1" />
-                          {tag}
-                        </>
-                      )}
-                    </Button>
-                  ))}
-                </div>
-              </div>
+              {/* Tags (hidden for MVP) */}
 
               {/* Buttons */}
               <div className="flex space-x-3 pt-4">
@@ -350,7 +469,7 @@ export const AddAgentModal = ({
                   Cancel
                 </Button>
                 <Button type="submit" className="flex-1 bg-gray-900 hover:bg-gray-800 text-white">
-                  {isEditing ? "Save" : "Create Agent"}
+                  {isEditing ? "Save" : "Create Tool"}
                 </Button>
               </div>
             </form>
