@@ -35,27 +35,25 @@ model Role {
 model UserRole {
   id        String   @id @default(cuid())
   userId    String   @map("user_id") // matches CurrentUser.id (string)
-  orgId     String?  @map("org_id")  // nullable if multi-tenancy is not used
   roleId    String   @map("role_id")
   role      Role     @relation(fields: [roleId], references: [id])
   createdAt DateTime @default(now()) @map("created_at")
 
-  @@unique([userId, roleId, orgId], name: "user_id_role_id_org_id")
+  @@unique([userId, roleId], name: "user_id_role_id")
   @@map("user_roles")
 }
 
 // ---------- Security Keys ----------
 
 model SecurityKey {
-  id               String    @id @default(cuid())
-  systemName       String    @unique @map("system_name")
-  description      String?
-  orgId            String?   @map("org_id")
-  createdByUserId  String?   @map("created_by_user_id")
-  createdAt        DateTime  @default(now()) @map("created_at")
-  updatedAt        DateTime  @updatedAt @map("updated_at")
-  n8nTools         N8NTool[]
-  dustTools        DustTool[]
+  id              String     @id @default(cuid())
+  systemName      String     @unique @map("system_name")
+  description     String?
+  createdByUserId String?    @map("created_by_user_id")
+  createdAt       DateTime   @default(now()) @map("created_at")
+  updatedAt       DateTime   @updatedAt @map("updated_at")
+  n8nTools        N8NTool[]
+  dustTools       DustTool[]
 
   @@map("security_keys")
 }
@@ -63,19 +61,18 @@ model SecurityKey {
 // ---------- Tools Registry (single namespace for explicit_call_name) ----------
 
 model ToolsRegistry {
-  id               String        @id @default(cuid())
-  explicitCallName String        @unique @map("explicit_call_name")
-  readableName     String        @map("readable_name")
-  toolType         ToolType      @map("tool_type")
-  isEnabled        Boolean       @default(true) @map("is_enabled")
-  orgId            String?       @map("org_id")
-  ownerUserId      String?       @map("owner_user_id")
-  createdAt        DateTime      @default(now()) @map("created_at")
-  updatedAt        DateTime      @updatedAt @map("updated_at")
+  id               String   @id @default(cuid())
+  explicitCallName String   @unique @map("explicit_call_name")
+  readableName     String   @map("readable_name")
+  toolType         ToolType @map("tool_type")
+  isEnabled        Boolean  @default(true) @map("is_enabled")
+  ownerUserId      String?  @map("owner_user_id")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
 
-  hardcoded       HardcodedTool?
-  n8n             N8NTool?
-  dust            DustTool?
+  hardcoded HardcodedTool?
+  n8n       N8NTool?
+  dust      DustTool?
 
   @@map("tools_registry")
 }
@@ -83,24 +80,24 @@ model ToolsRegistry {
 // ---------- Tool profiles (1:1 with ToolsRegistry) ----------
 
 model HardcodedTool {
-  id        String        @id
-  registry  ToolsRegistry @relation(fields: [id], references: [id], onDelete: Cascade)
-  notes     String?
+  id       String        @id
+  registry ToolsRegistry @relation(fields: [id], references: [id], onDelete: Cascade)
+  notes    String?
 
   @@map("hardcoded_tools")
 }
 
 model N8NTool {
-  id                   String        @id
-  registry             ToolsRegistry @relation(fields: [id], references: [id], onDelete: Cascade)
-  returnDirect         Boolean       @default(false) @map("return_direct")
-  isIsolated           Boolean       @default(false) @map("is_isolated")
-  streamIfSingleTool   Boolean       @default(false) @map("stream_if_single_tool")
-  flashAnswerNeeded    Boolean       @default(false) @map("flash_answer_needed")
-  timeoutSeconds       Int           @default(30) @map("timeout_seconds")
-  externalUrl          String        @map("external_url")
-  securityKeyId        String        @map("security_key_id")
-  securityKey          SecurityKey   @relation(fields: [securityKeyId], references: [id], onDelete: Restrict)
+  id                 String        @id
+  registry           ToolsRegistry @relation(fields: [id], references: [id], onDelete: Cascade)
+  returnDirect       Boolean       @default(false) @map("return_direct")
+  isIsolated         Boolean       @default(false) @map("is_isolated")
+  streamIfSingleTool Boolean       @default(false) @map("stream_if_single_tool")
+  flashAnswerNeeded  Boolean       @default(false) @map("flash_answer_needed")
+  timeoutSeconds     Int           @default(30) @map("timeout_seconds")
+  externalUrl        String        @map("external_url")
+  securityKeyId      String        @map("security_key_id")
+  securityKey        SecurityKey   @relation(fields: [securityKeyId], references: [id], onDelete: Restrict)
 
   @@map("n8n_tools")
 }
