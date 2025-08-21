@@ -65,8 +65,6 @@ model ToolsRegistry {
   explicitCallName String   @unique @map("explicit_call_name")
   readableName     String   @map("readable_name")
   toolType         ToolType @map("tool_type")
-  isEnabled        Boolean  @default(true) @map("is_enabled")
-  ownerUserId      String?  @map("owner_user_id")
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
 
