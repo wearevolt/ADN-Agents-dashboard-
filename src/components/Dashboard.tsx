@@ -11,36 +11,17 @@ import { AgentContextMenu } from "./AgentContextMenu";
 import { AgentInfoModal } from "./AgentInfoModal";
 import ConfirmationModal from "./ConfirmationModal";
 import { TagsList } from "@/components/ui/TagsList";
+import { useTagsStore } from "@/store/tags";
 import { toast } from "sonner";
 
 // Типы для тегов
-export type AgentTag =
-  | "Experimental"
-  | "KPI"
-  | "Banking"
-  | "Financial"
-  | "Analytics"
-  | "Marketing"
-  | "Sales"
-  | "Operations"
-  | "Research";
-
-export const AVAILABLE_TAGS: AgentTag[] = [
-  "Experimental",
-  "KPI",
-  "Banking",
-  "Financial",
-  "Analytics",
-  "Marketing",
-  "Sales",
-  "Operations",
-  "Research",
-];
+export type AgentTag = string;
 
 // Функция для генерации случайных тегов (1-2 тега)
-const getRandomTags = (): AgentTag[] => {
-  const shuffled = [...AVAILABLE_TAGS].sort(() => 0.5 - Math.random());
-  const count = Math.floor(Math.random() * 2) + 1; // 1 или 2 тега
+const getRandomTags = (available: AgentTag[]): AgentTag[] => {
+  if (!available?.length) return [];
+  const shuffled = [...available].sort(() => 0.5 - Math.random());
+  const count = Math.floor(Math.random() * 2) + 1;
   return shuffled.slice(0, count);
 };
 
@@ -72,184 +53,10 @@ interface LibraryAgent {
   tags?: AgentTag[]; // Теги агента
 }
 
-// TODO: Replace with real agent data from API
-// In future: fetch agents from backend based on user ID
-// Each user will have their own list of agents stored in database
-const initialAgents: Agent[] = [
-  {
-    id: "1",
-    name: "@digest",
-    type: "personal",
-    status: "active",
-    items: [
-      "Apple acquired AI startup",
-      "Figma announced Series C extension",
-      "Notion launched embedded agents",
-    ],
-    updatedTime: "8min ago",
-    apiKey: "sk-demo-1234567890abcdef",
-    agentUrl: "https://digest-agent.example.com",
-    webhookUrl: "https://digest-webhook.example.com",
-    isCustom: true,
-    createdBy: "jane.doe@example.com",
-    tags: getRandomTags(),
-  },
-  {
-    id: "2",
-    name: "@research_bot",
-    type: "personal",
-    status: "active",
-    items: [
-      "OpenAI releases GPT-4 Turbo improvements",
-      "Tesla announces new manufacturing facility",
-      "Meta launches improved LLaMA model",
-    ],
-    updatedTime: "12min ago",
-    apiKey: "sk-research-abcdef1234567890",
-    agentUrl: "https://research-agent.example.com",
-    webhookUrl: "https://research-webhook.example.com",
-    isCustom: true,
-    createdBy: "jane.doe@example.com",
-    tags: getRandomTags(),
-  },
-  {
-    id: "3",
-    name: "@analytics_pro",
-    type: "personal",
-    status: "active",
-    items: [
-      "Q4 revenue reports show 23% growth",
-      "Customer acquisition costs decreased by 15%",
-      "Market share increased in key demographics",
-    ],
-    updatedTime: "15min ago",
-    apiKey: "sk-analytics-fedcba0987654321",
-    agentUrl: "https://analytics-agent.example.com",
-    webhookUrl: "https://analytics-webhook.example.com",
-    isCustom: true,
-    createdBy: "team@example.com", // Создан другим пользователем
-    tags: getRandomTags(),
-  },
-  {
-    id: "4",
-    name: "@alert_system",
-    type: "personal",
-    status: "error",
-    errorMessage:
-      "Error connect — unable to establish a stable handshake with the inference server",
-    updatedTime: "8min ago",
-    apiKey: "sk-alert-1122334455667788",
-    agentUrl: "https://alert-agent.example.com",
-    webhookUrl: "https://alert-webhook.example.com",
-    isCustom: true,
-    createdBy: "jane.doe@example.com",
-    tags: getRandomTags(),
-  },
-  {
-    id: "5",
-    name: "🎯 @strategy_advisor",
-    type: "personal",
-    status: "active",
-    description:
-      "Competitor analysis reveals new market opportunities. Product roadmap alignment with customer feedback shows positive trends. Strategic partnerships in fintech sector are expanding rapidly with 15% growth this quarter.",
-    updatedTime: "20min ago",
-    apiKey: "sk-strategy-8877665544332211",
-    webhookUrl: "https://strategy-webhook.example.com",
-    isCustom: true,
-    createdBy: "jane.doe@example.com",
-    tags: getRandomTags(),
-  },
-  {
-    id: "6",
-    name: "📝 @content_creator",
-    type: "personal",
-    status: "active",
-    items: [
-      "Blog post about AI trends generated",
-      "Social media campaign materials ready",
-      "Newsletter draft completed for review",
-    ],
-    updatedTime: "7 days ago",
-    apiKey: "sk-content-9988776655443322",
-    webhookUrl: "https://content-webhook.example.com",
-    isCustom: true,
-    createdBy: "team@example.com", // Создан другим пользователем
-    tags: getRandomTags(),
-  },
-];
+// Initial agents are empty; we'll load them from backend registry
+const initialAgents: Agent[] = [];
 
-const initialLibraryAgents: LibraryAgent[] = [
-  {
-    id: "lib1",
-    name: "@term_sheet_titan",
-    description:
-      "Reviews draft term sheets, highlights unusual clauses, and suggests market-standard adjustments. Helps your associates prepare bulletproof offers",
-    category: "Analysis",
-    emoji: "📊",
-    createdBy: "John Smith",
-    tags: getRandomTags(),
-  },
-  {
-    id: "lib2",
-    name: "@pitch_screener_pro",
-    description:
-      "Rapidly analyzes pitch decks and one-pagers, scoring them against your fund's thesis and past deals. Summarizes red flags and unique hooks.",
-    category: "Analysis",
-    emoji: "💡",
-    createdBy: "Sarah Johnson",
-    tags: getRandomTags(),
-  },
-  {
-    id: "lib3",
-    name: "@market_maven",
-    description:
-      "Generates dynamic market maps and competitive landscapes for any startup vertical. Pulls in recent funding rounds and key trends.",
-    category: "Analysis",
-    emoji: "❤️",
-    createdBy: "Michael Brown",
-    tags: getRandomTags(),
-  },
-  {
-    id: "lib4",
-    name: "@term_sheet_titan",
-    description:
-      "Reviews draft term sheets, highlights unusual clauses, and suggests market-standard adjustments. Helps your associates prepare bulletproof offers",
-    category: "Analysis",
-    emoji: "📊",
-    createdBy: "John Smith",
-    tags: getRandomTags(),
-  },
-  {
-    id: "lib5",
-    name: "@term_sheet_titan",
-    description:
-      "Reviews draft term sheets, highlights unusual clauses, and suggests market-standard adjustments. Helps your associates prepare bulletproof offers",
-    category: "Metrics",
-    emoji: "📊",
-    createdBy: "Emily Davis",
-    tags: getRandomTags(),
-  },
-  {
-    id: "lib6",
-    name: "@pitch_screener_pro",
-    description:
-      "Rapidly analyzes pitch decks and one-pagers, scoring them against your fund's thesis and past deals. Summarizes red flags and unique hooks.",
-    category: "Metrics",
-    emoji: "📊",
-    createdBy: "Robert Wilson",
-    tags: getRandomTags(),
-  },
-  {
-    id: "lib7",
-    name: "@market_maven",
-    description:
-      "Generates dynamic market maps and competitive landscapes for any startup vertical. Pulls in recent funding rounds and key trends.",
-    category: "Metrics",
-    emoji: "📊",
-    createdBy: "Lisa Anderson",
-    tags: getRandomTags(),
-  },
-];
+const initialLibraryAgents: LibraryAgent[] = [];
 
 interface User {
   name: string;
@@ -264,9 +71,11 @@ interface DashboardProps {
 
 const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
   const [activeTab, setActiveTab] = useState("My agents");
+  const { tags: storeTags, fetchIfNeeded } = useTagsStore();
   const [inputValue, setInputValue] = useState("");
   const [agents, setAgents] = useState<Agent[]>(initialAgents);
   const [libraryAgents, setLibraryAgents] = useState<LibraryAgent[]>(initialLibraryAgents);
+  const [isAgentsLoading, setIsAgentsLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingAgent, setEditingAgent] = useState<Agent | null>(null);
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
@@ -276,15 +85,40 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [selectedTagsFilter, setSelectedTagsFilter] = useState<AgentTag[]>([]);
 
-  // TODO: Load user's agents from backend on component mount
-  // useEffect(() => {
-  //   const loadUserAgents = async () => {
-  //     const response = await fetch(`/api/users/${user.id}/agents`)
-  //     const userAgents = await response.json()
-  //     setAgents(userAgents)
-  //   }
-  //   loadUserAgents()
-  // }, [user.id])
+  // Load tools from backend registry + hardcoded notes
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setIsAgentsLoading(true);
+        const [regRes, hcRes] = await Promise.all([
+          fetch("/api/tools/registry", { cache: "no-store" }),
+          fetch("/api/tools/hardcoded", { cache: "no-store" }),
+        ]);
+        const registry = regRes.ok ? await regRes.json() : [];
+        const hardcoded = hcRes.ok ? await hcRes.json() : [];
+        const notesById = new Map<string, string | undefined>();
+        for (const h of hardcoded) {
+          notesById.set(h.id, h?.notes || h?.registry?.notes || undefined);
+        }
+        const mapped: Agent[] = (registry as any[]).map((r) => ({
+          id: r.id,
+          name: `@${r.explicitCallName}`,
+          type: "personal",
+          status: "active",
+          description:
+            r.toolType === "HARD_CODED" ? notesById.get(r.id) || "" : `${r.toolType} tool`,
+          isCustom: true,
+          tags: getRandomTags(storeTags as AgentTag[]),
+        }));
+        setAgents(mapped);
+      } catch {
+        setAgents([]);
+      } finally {
+        setIsAgentsLoading(false);
+      }
+    };
+    load();
+  }, [storeTags]);
 
   const [addedAgents, setAddedAgents] = useState<{
     personal: Set<string>;
@@ -729,7 +563,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
             <h3 className="text-sm font-medium text-gray-900">Filter by tags</h3>
 
             <div className="flex flex-wrap gap-2">
-              {AVAILABLE_TAGS.map((tag) => (
+              {(storeTags as AgentTag[]).map((tag) => (
                 <Button
                   key={tag}
                   variant="outline"
@@ -1048,7 +882,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
               <span className="hidden sm:inline">New agent</span>
               <Plus className="h-4 w-4" />
             </Button>
-            <Button
+            {/* <Button
               variant="ghost"
               size="icon"
               className="h-9 w-9 hover:bg-gray-100 text-gray-600"
@@ -1069,7 +903,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
                 <polyline points="16 17 21 12 16 7"></polyline>
                 <line x1="21" y1="12" x2="9" y2="12"></line>
               </svg>
-            </Button>
+            </Button> */}
           </div>
         </div>
       </header>
@@ -1084,7 +918,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
               <p className="text-gray-600">Start a conversation with your AI agents</p>
             </div>
 
-            <div className="relative bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            {/* <div className="relative bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
               <textarea
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
@@ -1093,7 +927,6 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
                 rows={4}
               />
 
-              {/* Expand button (top right) */}
               <Button
                 variant="ghost"
                 size="icon"
@@ -1119,7 +952,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
                   Send
                 </Button>
               </div>
-            </div>
+            </div> */}
           </div>
         )}
 

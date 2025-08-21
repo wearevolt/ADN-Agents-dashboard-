@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { X, Check, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import { AgentTag } from "./Dashboard";
 import { useUserRoles } from "@/hooks/useUserRoles";
+import { useTagsStore } from "@/store/tags";
 import {
   Select,
   SelectTrigger,
@@ -73,6 +74,13 @@ export const AddAgentModal = ({
   // Deprecated in new model (kept for compatibility with parent handlers)
   const [isPrivate, setIsPrivate] = useState(true);
   const [selectedTags, setSelectedTags] = useState<AgentTag[]>([]);
+  const { tags: storeTags, fetchIfNeeded, forceRefresh } = useTagsStore();
+  const [availableTags, setAvailableTags] = useState<AgentTag[]>([]);
+  const toggleTag = (tag: AgentTag) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
   // New form state (mapped to old handlers on submit for compatibility)
   const [toolType, setToolType] = useState<"HARD_CODED" | "N8N" | "DUST">("HARD_CODED");
   const [explicitName, setExplicitName] = useState("");
@@ -196,6 +204,11 @@ export const AddAgentModal = ({
     };
   }, [isAdmin, toolType]);
 
+  // Load available tags via store
+  useEffect(() => {
+    fetchIfNeeded().then(() => setAvailableTags(storeTags as AgentTag[]));
+  }, [storeTags, fetchIfNeeded]);
+
   const [errorText, setErrorText] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -237,7 +250,7 @@ export const AddAgentModal = ({
       setSubmitting(true);
       const profile =
         toolType === "HARD_CODED"
-          ? { notes: description || undefined }
+          ? { notes: description || undefined, tags: selectedTags }
           : toolType === "N8N"
             ? {
                 external_url: n8nExternalUrl.trim(),
@@ -247,6 +260,7 @@ export const AddAgentModal = ({
                 stream_if_single_tool: n8nStreamIfSingle,
                 flash_answer_needed: n8nFlashAnswerNeeded,
                 timeout_seconds: n8nTimeoutSeconds,
+                tags: selectedTags,
               }
             : {
                 dust_workspace_sid: dustWorkspaceSid.trim(),
@@ -258,6 +272,7 @@ export const AddAgentModal = ({
                 api_timeout_seconds: dustApiTimeout,
                 message_events_timeout_seconds: dustMsgEventsTimeout,
                 conversation_events_timeout_seconds: dustConvEventsTimeout,
+                tags: selectedTags,
               };
 
       const res = await fetch("/api/tools", {
@@ -289,7 +304,7 @@ export const AddAgentModal = ({
         webhookUrl: formData.webhookUrl,
         description,
         isPrivate: true,
-        tags: [],
+        tags: selectedTags,
       });
     } catch {
       setErrorText("Network error");
@@ -323,7 +338,7 @@ export const AddAgentModal = ({
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
-            className="bg-white rounded-lg p-6 w-full max-w-md border border-gray-200 shadow-lg"
+            className="bg-white rounded-lg p-6 w-full max-w-md border border-gray-200 shadow-lg max-h-[85vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-6">
@@ -599,6 +614,39 @@ export const AddAgentModal = ({
               </div>
 
               {/* Tags (hidden for MVP) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tags (optional)
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {availableTags.map((tag) => (
+                    <Button
+                      key={tag}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className={`text-xs px-2 py-1 h-7 ${
+                        selectedTags.includes(tag)
+                          ? "bg-blue-50 border-blue-300 text-blue-700 hover:bg-blue-100 hover:border-blue-400 hover:text-blue-700"
+                          : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                      }`}
+                      onClick={() => toggleTag(tag)}
+                    >
+                      {selectedTags.includes(tag) ? (
+                        <>
+                          <Check className="h-3 w-3 mr-1" />
+                          {tag}
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="h-3 w-3 mr-1" />
+                          {tag}
+                        </>
+                      )}
+                    </Button>
+                  ))}
+                </div>
+              </div>
 
               {/* Buttons */}
               <div className="flex space-x-3 pt-4">

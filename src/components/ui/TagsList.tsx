@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
-import { AgentTag } from "../Dashboard";
+
+type AgentTag = string;
 
 interface TagsListProps {
   tags: AgentTag[];

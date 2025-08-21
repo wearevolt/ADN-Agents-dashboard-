@@ -52,7 +52,7 @@ export const POST = withAuth(async ({ request, user }) => {
   try {
     const result = await prisma.$transaction(async (tx) => {
       const reg = await tx.toolsRegistry.create({
-        data: { explicitCallName, readableName, toolType },
+        data: { explicitCallName, readableName, toolType, tags: Array.isArray((profile as any).tags) ? (profile as any).tags.map(String) : [] },
         select: { id: true, toolType: true },
       });
 

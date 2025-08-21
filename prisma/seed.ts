@@ -36,6 +36,22 @@ async function main() {
     }
   }
 
+  // Seed default tags dictionary
+  const defaultTags = [
+    "Experimental",
+    "KPI",
+    "Banking",
+    "Financial",
+    "Analytics",
+    "Marketing",
+    "Sales",
+    "Operations",
+    "Research",
+  ];
+  for (const name of defaultTags) {
+    await prisma.tag.upsert({ where: { name }, update: {}, create: { name } });
+  }
+
   // Optional: create a demo SecurityKey
   if (process.env.SEED_CREATE_SECURITY_KEY === "1") {
     await prisma.securityKey.upsert({

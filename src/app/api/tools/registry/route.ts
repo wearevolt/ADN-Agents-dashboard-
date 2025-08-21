@@ -14,7 +14,11 @@ export const GET = withAuth(async ({ request }) => {
   // List tools registry with optional type filter
   const { searchParams } = new URL(request.url);
   const type = searchParams.get("type");
-  const where = type ? { toolType: type as any } : undefined;
+  const tag = searchParams.get("tag");
+  const where = {
+    ...(type ? { toolType: type as any } : {}),
+    ...(tag ? { tags: { has: tag } } : {}),
+  } as any;
   const items = await prisma.toolsRegistry.findMany({
     where,
     orderBy: { createdAt: "desc" },
@@ -23,6 +27,7 @@ export const GET = withAuth(async ({ request }) => {
       explicitCallName: true,
       readableName: true,
       toolType: true,
+      tags: true,
       createdAt: true,
       updatedAt: true,
     },
