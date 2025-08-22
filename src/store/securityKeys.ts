@@ -27,14 +27,16 @@ export const useSecurityKeysStore = create<SecurityKeysState>((set, get) => ({
     try {
       const res = await fetch("/api/tools/security-keys", { cache: "no-store" });
       if (res.status === 403 || res.status === 401) {
-        set({ keys: [], loading: false, lastFetchedAt: now });
+        // Do not cache forbidden/unauthorized to allow retry when role changes
+        set({ keys: [], loading: false });
         return;
       }
       if (!res.ok) throw new Error(String(res.status));
       const data = (await res.json()) as SecurityKey[];
       set({ keys: data, loading: false, lastFetchedAt: now });
     } catch (e: any) {
-      set({ error: e?.message || String(e), loading: false, lastFetchedAt: now });
+      // Do not set lastFetchedAt on error; allow retry on next focus/open
+      set({ error: e?.message || String(e), loading: false });
     }
   },
   forceRefresh: async () => {

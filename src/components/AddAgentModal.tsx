@@ -110,7 +110,11 @@ export const AddAgentModal = ({
   const [dustConvEventsTimeout, setDustConvEventsTimeout] = useState<number>(30);
 
   // Security Keys for admin (N8N/DUST)
-  const { keys: securityKeys, loading: securityKeysLoading, fetchIfNeeded: fetchSecurityKeys } = useSecurityKeysStore();
+  const {
+    keys: securityKeys,
+    loading: securityKeysLoading,
+    fetchIfNeeded: fetchSecurityKeys,
+  } = useSecurityKeysStore();
 
   // Legacy fields preserved for compatibility with parent props
   const [formData, setFormData] = useState({
@@ -186,6 +190,13 @@ export const AddAgentModal = ({
     if (!(toolType === "N8N" || toolType === "DUST")) return;
     fetchSecurityKeys();
   }, [isAdmin, toolType, fetchSecurityKeys]);
+
+  // Also trigger fetch when modal opens for admin (handles first-open case)
+  useEffect(() => {
+    if (!isOpen) return;
+    if (!isAdmin) return;
+    fetchSecurityKeys();
+  }, [isOpen, isAdmin, fetchSecurityKeys]);
 
   // Load available tags via store
   useEffect(() => {

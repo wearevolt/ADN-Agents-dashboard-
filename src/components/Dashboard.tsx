@@ -88,7 +88,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
 
   // Load tools from backend registry + hardcoded notes
   useEffect(() => {
-    // Preload security keys for ADMINs only; backend enforces role
+    // Preload security keys; backend enforces ADMIN-only
     fetchSecurityKeys();
     const load = async () => {
       try {
