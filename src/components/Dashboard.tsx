@@ -12,6 +12,7 @@ import { AgentInfoModal } from "./AgentInfoModal";
 import ConfirmationModal from "./ConfirmationModal";
 import { TagsList } from "@/components/ui/TagsList";
 import { useTagsStore } from "@/store/tags";
+import { useSecurityKeysStore } from "@/store/securityKeys";
 import { toast } from "sonner";
 
 // Типы для тегов
@@ -71,6 +72,7 @@ interface DashboardProps {
 const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
   const [activeTab, setActiveTab] = useState("My agents");
   const { tags: storeTags, fetchIfNeeded } = useTagsStore();
+  const { fetchIfNeeded: fetchSecurityKeys } = useSecurityKeysStore();
   const [inputValue, setInputValue] = useState("");
   const [agents, setAgents] = useState<Agent[]>(initialAgents);
   const [libraryAgents, setLibraryAgents] = useState<LibraryAgent[]>(initialLibraryAgents);
@@ -86,6 +88,8 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
 
   // Load tools from backend registry + hardcoded notes
   useEffect(() => {
+    // Preload security keys for ADMINs only; backend enforces role
+    fetchSecurityKeys();
     const load = async () => {
       try {
         setIsAgentsLoading(true);
@@ -177,6 +181,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
   };
 
   const handleAddAgent = (newAgent: {
+    id: string;
     name: string;
     displayName: string;
     apiKey: string;
@@ -186,7 +191,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
     tags: AgentTag[];
   }) => {
     const agent: Agent = {
-      id: Date.now().toString(),
+      id: newAgent.id,
       name: newAgent.name,
       displayName: newAgent.displayName,
       description: newAgent.description,
@@ -336,15 +341,13 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
     }
   };
 
-  const handleRemoveFromPersonal = (agentId: string) => {
+  const handleRemoveFromPersonal = async (agentId: string) => {
     const agent = agents.find((a) => a.id === agentId);
     if (!agent) return;
 
-    // Удаляем агента из персонального списка
-    setAgents(agents.filter((a) => a.id !== agentId));
-
-    // Если это библиотечный агент, также удаляем из addedAgents
     if (!agent.isCustom) {
+      // Удаляем из персонального списка только для библиотечных агентов (локально)
+      setAgents(agents.filter((a) => a.id !== agentId));
       const libraryAgent = libraryAgents.find((lib) => lib.name === agent.name);
       if (libraryAgent) {
         setAddedAgents((prev) => ({
@@ -352,9 +355,22 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
           personal: new Set(Array.from(prev.personal).filter((id) => id !== libraryAgent.id)),
         }));
       }
+      toast.success("Agent removed from personal list");
+      return;
     }
 
-    toast.success("Agent removed from personal list");
+    // Для пользовательских агентов выполняем реальное удаление через API
+    try {
+      const res = await fetch(`/api/tools/registry/${agentId}`, { method: "DELETE" });
+      if (!res.ok) {
+        const msg = await res.text();
+        throw new Error(msg || `Failed with ${res.status}`);
+      }
+      setAgents(agents.filter((a) => a.id !== agentId));
+      toast.success("Agent deleted");
+    } catch (e) {
+      toast.error("Failed to delete agent");
+    }
   };
 
   // Функция для определения может ли пользователь удалить агента полностью
@@ -375,7 +391,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
     return agent.isCustom && agent.createdBy !== user.email;
   };
 
-  const confirmDeleteAgent = () => {
+  const confirmDeleteAgent = async () => {
     if (!agentToDelete) return;
 
     const deletedAgent = agents.find((agent) => agent.id === agentToDelete);
@@ -401,12 +417,21 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
       }
     }
 
-    setAgents(agents.filter((agent) => agent.id !== agentToDelete));
-    setAgentToDelete(null);
-
-    // TODO: Delete agent from backend
-    // DELETE /api/agents/{agentId} with user ID
-    // Remove from user's agent list in database
+    try {
+      // Backend delete: registry + profile via cascade
+      const res = await fetch(`/api/tools/registry/${agentToDelete}`, { method: "DELETE" });
+      if (!res.ok) {
+        const msg = await res.text();
+        throw new Error(msg || `Failed with ${res.status}`);
+      }
+      setAgents(agents.filter((agent) => agent.id !== agentToDelete));
+      toast.success("Agent deleted");
+    } catch (e) {
+      toast.error("Failed to delete agent");
+    } finally {
+      setAgentToDelete(null);
+      setShowDeleteConfirmation(false);
+    }
   };
 
   const handleLogout = () => {
@@ -852,14 +877,14 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
       {/* Main Content */}
       <main className="flex-1 p-6">
         {/* Search Input - только для My agents */}
-        {activeTab === "My agents" && (
+        {/* activeTab === "My agents" && (
           <div className="max-w-4xl mx-auto mb-8">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-semibold text-gray-900 mb-2">Hi, {user.name} 👋</h2>
               <p className="text-gray-600">Start a conversation with your AI agents</p>
             </div>
 
-            {/* <div className="relative bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+            <div className="relative bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
               <textarea
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
@@ -893,9 +918,9 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
                   Send
                 </Button>
               </div>
-            </div> */}
+            </div>
           </div>
-        )}
+        )*/}
 
         {/* Content based on active tab */}
         {activeTab === "Team Library" ? renderLibraryView() : renderAgentsGrid()}

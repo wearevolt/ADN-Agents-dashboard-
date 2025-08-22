@@ -10,14 +10,18 @@ async function isAdmin(userId: string): Promise<boolean> {
   return !!match;
 }
 
-export const GET = withAuth(async () => {
-  // List security keys for selection
+export const GET = withAuth(async ({ user }) => {
+  // Only ADMINs can list security keys
+  if (!(await isAdmin(user.id))) {
+    return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  }
   const keys = await prisma.securityKey.findMany({
     orderBy: { createdAt: "desc" },
     select: { id: true, systemName: true, description: true },
   });
-  // Map to snake_case field expected by frontend
-  return NextResponse.json(keys.map((k) => ({ id: k.id, system_name: k.systemName, description: k.description })));
+  return NextResponse.json(
+    keys.map((k) => ({ id: k.id, system_name: k.systemName, description: k.description }))
+  );
 });
 
 export const POST = withAuth(async ({ request, user }) => {

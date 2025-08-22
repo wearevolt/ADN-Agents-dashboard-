@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import { AgentTag } from "./Dashboard";
 import { useUserRoles } from "@/hooks/useUserRoles";
+import { useSecurityKeysStore } from "@/store/securityKeys";
 import { useTagsStore } from "@/store/tags";
 import {
   Select,
@@ -38,6 +39,7 @@ interface AddAgentModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAddAgent: (agent: {
+    id: string;
     name: string;
     displayName: string;
     apiKey: string;
@@ -108,8 +110,7 @@ export const AddAgentModal = ({
   const [dustConvEventsTimeout, setDustConvEventsTimeout] = useState<number>(30);
 
   // Security Keys for admin (N8N/DUST)
-  const [securityKeys, setSecurityKeys] = useState<{ id: string; system_name: string }[]>([]);
-  const [securityKeysLoading, setSecurityKeysLoading] = useState(false);
+  const { keys: securityKeys, loading: securityKeysLoading, fetchIfNeeded: fetchSecurityKeys } = useSecurityKeysStore();
 
   // Legacy fields preserved for compatibility with parent props
   const [formData, setFormData] = useState({
@@ -146,6 +147,7 @@ export const AddAgentModal = ({
         });
       } else {
         setSelectedTags([]);
+        setSelectedTagIds([]);
         setToolType(isAdmin ? "HARD_CODED" : "HARD_CODED");
         setExplicitName("");
         setDisplayName("");
@@ -182,28 +184,8 @@ export const AddAgentModal = ({
   useEffect(() => {
     if (!isAdmin) return;
     if (!(toolType === "N8N" || toolType === "DUST")) return;
-    // Parse security keys from env CSV
-    // Supports formats: "id1,id2" or "id1:name1,id2:name2"
-    try {
-      setSecurityKeysLoading(true);
-      const csv = process.env.NEXT_PUBLIC_SECURITY_KEYS || "";
-      const list = csv
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean)
-        .map((entry) => {
-          const [idRaw, nameRaw] = entry.split(":");
-          const id = (idRaw || "").trim();
-          const system_name = (nameRaw || id).trim();
-          return { id, system_name } as { id: string; system_name: string };
-        });
-      setSecurityKeys(list);
-    } catch {
-      setSecurityKeys([]);
-    } finally {
-      setSecurityKeysLoading(false);
-    }
-  }, [isAdmin, toolType]);
+    fetchSecurityKeys();
+  }, [isAdmin, toolType, fetchSecurityKeys]);
 
   // Load available tags via store
   useEffect(() => {
@@ -295,6 +277,14 @@ export const AddAgentModal = ({
     if (Object.keys(newFieldErrors).length > 0) {
       setFieldErrors(newFieldErrors);
       setErrorText("Please fix the errors below");
+      setSubmitting(false);
+      return;
+    }
+
+    // RBAC preflight: prevent non-admin from selecting non-hardcoded types
+    if (!isAdmin && toolType !== "HARD_CODED") {
+      setErrorText("Only administrators can create this tool type");
+      setFieldErrors((prev) => ({ ...prev, toolType: "Requires ADMIN role" }));
       setSubmitting(false);
       return;
     }
@@ -408,13 +398,21 @@ export const AddAgentModal = ({
         if (res.status === 409 || apiError === "explicit_call_name_conflict") {
           setFieldErrors((prev) => ({ ...prev, explicitName: "Explicit name is already taken" }));
         }
+        if (res.status === 403 || apiError === "forbidden") {
+          setFieldErrors((prev) => ({
+            ...prev,
+            toolType: "Only administrators can create this tool type",
+          }));
+        }
         setErrorText(message);
         setSubmitting(false);
         return;
       }
 
+      const json = (await res.json()) as { id: string };
       const nameWithAt = explicitName.startsWith("@") ? explicitName : `@${explicitName}`;
       onAddAgent({
+        id: json.id,
         name: nameWithAt,
         displayName: displayName.trim(),
         apiKey: "",
@@ -486,7 +484,13 @@ export const AddAgentModal = ({
                   </div>
                 ) : isAdmin ? (
                   <Select value={toolType} onValueChange={(v) => setToolType(v as any)}>
-                    <SelectTrigger className="bg-white border-gray-300 text-gray-900">
+                    <SelectTrigger
+                      className={`bg-white text-gray-900 ${
+                        fieldErrors.toolType
+                          ? "border-red-500 focus:border-red-500"
+                          : "border-gray-300"
+                      }`}
+                    >
                       <SelectValue placeholder="Select tool type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -497,6 +501,9 @@ export const AddAgentModal = ({
                   </Select>
                 ) : (
                   <div className="text-sm text-gray-600">Hardcoded</div>
+                )}
+                {fieldErrors.toolType && (
+                  <p className="mt-1 text-xs text-red-600">{fieldErrors.toolType}</p>
                 )}
               </div>
 
