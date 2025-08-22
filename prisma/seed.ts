@@ -52,7 +52,33 @@ async function main() {
     await prisma.tag.upsert({ where: { name }, update: {}, create: { name } });
   }
 
-  // Optional: create a demo SecurityKey
+  // Seed security keys from env variable SECURITY_KEYS_SEED
+  // Expected formats (comma or newline separated):
+  // - "system_a"
+  // - "system_a|Description A"
+  // Example: SECURITY_KEYS_SEED="vault_main|Main org vault,internal_n8n|N8N shared key,external_dust|Dust workspace key"
+  const securityKeysSeedRaw = (process.env.SECURITY_KEYS_SEED || "").trim();
+  if (securityKeysSeedRaw.length > 0) {
+    const entries = securityKeysSeedRaw
+      .split(/[\n,]/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    for (const entry of entries) {
+      const [nameRaw, descriptionRaw] = entry.split("|");
+      const systemName = (nameRaw || "").trim();
+      const description = (descriptionRaw || "").trim();
+      if (!systemName) continue;
+
+      await prisma.securityKey.upsert({
+        where: { systemName },
+        update: description ? { description } : {},
+        create: { systemName, description: description || undefined },
+      });
+    }
+  }
+
+  // Optional: create a demo SecurityKey (legacy toggle)
   if (process.env.SEED_CREATE_SECURITY_KEY === "1") {
     await prisma.securityKey.upsert({
       where: { systemName: "demo-key" },
