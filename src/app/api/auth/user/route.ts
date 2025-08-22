@@ -19,7 +19,7 @@ export async function GET(request: Request) {
     if (MAIN_USERINFO_URL) {
       const cookieHeader = request.headers.get("cookie") || "";
       const body = JSON.stringify({
-        query: "query Me { me { id email } }",
+        query: "query Me { me { id email full_name } }",
         variables: {},
       });
       if (AUTH_DEBUG) {
@@ -67,11 +67,13 @@ export async function GET(request: Request) {
       }
       meId = me?.id as string | undefined;
       meEmail = me?.email as string | undefined;
+      var meFullName: string | undefined = me?.full_name as string | undefined;
     }
 
     return NextResponse.json({
       id: meId || user.id,
       email: meEmail || user.email,
+      fullName: (typeof meFullName !== "undefined" && meFullName) ? meFullName : undefined,
       active: true,
       roles: user.roles ?? [],
       tenantId: user.tenantId ?? null,

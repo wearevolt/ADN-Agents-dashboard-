@@ -855,7 +855,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
         {activeTab === "My agents" && (
           <div className="max-w-4xl mx-auto mb-8">
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Hi Alex 👋</h2>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Hi, {user.name} 👋</h2>
               <p className="text-gray-600">Start a conversation with your AI agents</p>
             </div>
 

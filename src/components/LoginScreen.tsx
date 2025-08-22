@@ -35,7 +35,9 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
         if (!cancelled && res.ok) {
           const data = await res.json();
           const email: string = data?.email || "";
-          const name = email?.split("@")[0] || "User";
+          const fullName: string | undefined = data?.fullName;
+          const name =
+            fullName && fullName.trim().length > 0 ? fullName : email?.split("@")[0] || "User";
           onLogin({ name, email });
           return;
         }

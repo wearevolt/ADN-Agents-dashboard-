@@ -182,23 +182,27 @@ export const AddAgentModal = ({
   useEffect(() => {
     if (!isAdmin) return;
     if (!(toolType === "N8N" || toolType === "DUST")) return;
-    let cancelled = false;
-    (async () => {
-      try {
-        setSecurityKeysLoading(true);
-        const res = await fetch("/api/tools/security-keys", { cache: "no-store" });
-        if (!res.ok) throw new Error(String(res.status));
-        const list = (await res.json()) as { id: string; system_name: string }[];
-        if (!cancelled) setSecurityKeys(list || []);
-      } catch {
-        if (!cancelled) setSecurityKeys([]);
-      } finally {
-        if (!cancelled) setSecurityKeysLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+    // Parse security keys from env CSV
+    // Supports formats: "id1,id2" or "id1:name1,id2:name2"
+    try {
+      setSecurityKeysLoading(true);
+      const csv = process.env.NEXT_PUBLIC_SECURITY_KEYS || "";
+      const list = csv
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .map((entry) => {
+          const [idRaw, nameRaw] = entry.split(":");
+          const id = (idRaw || "").trim();
+          const system_name = (nameRaw || id).trim();
+          return { id, system_name } as { id: string; system_name: string };
+        });
+      setSecurityKeys(list);
+    } catch {
+      setSecurityKeys([]);
+    } finally {
+      setSecurityKeysLoading(false);
+    }
   }, [isAdmin, toolType]);
 
   // Load available tags via store
@@ -240,30 +244,63 @@ export const AddAgentModal = ({
 
   const [errorText, setErrorText] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const mapApiErrorToMessage = (code?: string): string => {
+    switch (code) {
+      case "explicit_call_name_conflict":
+        return "Explicit name is already taken";
+      case "missing_fields":
+        return "Please fill in all required fields";
+      case "missing_profile_fields":
+        return "Please fill in all required fields for selected tool type";
+      case "invalid_tag_ids":
+        return "Some selected tags are invalid";
+      case "forbidden":
+        return "Only administrators can create this tool type";
+      case "create_failed":
+        return "Failed to create tool. Please try again later";
+      default:
+        return "Unexpected error occurred";
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitting(true);
     setErrorText(null);
-    if (!explicitName.trim() || !displayName.trim()) {
-      setErrorText("Please fill required fields");
-      return;
+    setFieldErrors({});
+
+    const newFieldErrors: Record<string, string> = {};
+    const explicit = explicitName.trim();
+    const explicitNoAt = explicit.replace(/^@+/, "");
+    if (!explicit) newFieldErrors.explicitName = "This field is required";
+    if (/@/.test(explicit))
+      newFieldErrors.explicitName = "Do not include @ (it's added automatically)";
+    if (explicitNoAt && !/^[a-z0-9_-]+$/.test(explicitNoAt)) {
+      newFieldErrors.explicitName = "Use lowercase letters, digits, dash or underscore";
     }
+    if (!displayName.trim()) newFieldErrors.displayName = "This field is required";
+
     if (toolType === "N8N") {
-      if (!n8nExternalUrl.trim() || !n8nSecurityKeyId) {
-        setErrorText("External URL and Security Key are required for N8N");
-        return;
-      }
+      if (!n8nExternalUrl.trim()) newFieldErrors.n8nExternalUrl = "External URL is required";
+      if (!n8nSecurityKeyId) newFieldErrors.n8nSecurityKeyId = "Security Key is required";
     }
     if (toolType === "DUST") {
-      if (!dustWorkspaceSid.trim() || !dustAgentSid.trim() || !dustSecurityKeyId) {
-        setErrorText("Workspace SID, Agent SID and Security Key are required for DUST");
-        return;
-      }
+      if (!dustWorkspaceSid.trim()) newFieldErrors.dustWorkspaceSid = "Workspace SID is required";
+      if (!dustAgentSid.trim()) newFieldErrors.dustAgentSid = "Agent SID is required";
+      if (!dustSecurityKeyId) newFieldErrors.dustSecurityKeyId = "Security Key is required";
+    }
+
+    if (Object.keys(newFieldErrors).length > 0) {
+      setFieldErrors(newFieldErrors);
+      setErrorText("Please fix the errors below");
+      setSubmitting(false);
+      return;
     }
 
     if (isEditing && editingAgent && onUpdateAgent) {
       try {
-        setSubmitting(true);
         // Update registry (names + tags)
         const regRes = await fetch(`/api/tools/registry/${editingAgent.id}`, {
           method: "PATCH",
@@ -323,7 +360,6 @@ export const AddAgentModal = ({
     }
 
     try {
-      setSubmitting(true);
       const profile =
         toolType === "HARD_CODED"
           ? { notes: description || undefined }
@@ -360,13 +396,19 @@ export const AddAgentModal = ({
           profile,
         }),
       });
-      if (res.status === 409) {
-        setErrorText("Explicit name is already taken");
-        setSubmitting(false);
-        return;
-      }
       if (!res.ok) {
-        setErrorText("Failed to create tool");
+        let apiError: string | undefined;
+        try {
+          const data = (await res.json()) as { error?: string } | null;
+          apiError = data?.error;
+        } catch {
+          apiError = undefined;
+        }
+        const message = mapApiErrorToMessage(apiError);
+        if (res.status === 409 || apiError === "explicit_call_name_conflict") {
+          setFieldErrors((prev) => ({ ...prev, explicitName: "Explicit name is already taken" }));
+        }
+        setErrorText(message);
         setSubmitting(false);
         return;
       }
@@ -428,6 +470,11 @@ export const AddAgentModal = ({
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              {errorText && (
+                <div className="text-sm bg-red-50 border border-red-200 text-red-700 rounded p-3">
+                  {errorText}
+                </div>
+              )}
               {/* Tool type (ADMIN only, locked in edit mode) */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Tool type</label>
@@ -466,10 +513,17 @@ export const AddAgentModal = ({
                     value={explicitName}
                     onChange={(e) => setExplicitName(e.target.value)}
                     placeholder="explicit_call_name"
-                    className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-gray-400 pl-8"
+                    className={`bg-white text-gray-900 placeholder-gray-500 pl-8 ${
+                      fieldErrors.explicitName
+                        ? "border-red-500 focus:border-red-500"
+                        : "border-gray-300 focus:border-gray-400"
+                    }`}
                     required
                   />
                 </div>
+                {fieldErrors.explicitName && (
+                  <p className="mt-1 text-xs text-red-600">{fieldErrors.explicitName}</p>
+                )}
               </div>
 
               {/* Display name */}
@@ -481,9 +535,16 @@ export const AddAgentModal = ({
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   placeholder="Readable name"
-                  className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-gray-400"
+                  className={`bg-white text-gray-900 placeholder-gray-500 ${
+                    fieldErrors.displayName
+                      ? "border-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:border-gray-400"
+                  }`}
                   required
                 />
+                {fieldErrors.displayName && (
+                  <p className="mt-1 text-xs text-red-600">{fieldErrors.displayName}</p>
+                )}
               </div>
 
               {/* Enabled removed per simplified schema */}
@@ -499,16 +560,29 @@ export const AddAgentModal = ({
                       value={n8nExternalUrl}
                       onChange={(e) => setN8nExternalUrl(e.target.value)}
                       placeholder="https://..."
-                      className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-gray-400"
+                      className={`bg-white text-gray-900 placeholder-gray-500 ${
+                        fieldErrors.n8nExternalUrl
+                          ? "border-red-500 focus:border-red-500"
+                          : "border-gray-300 focus:border-gray-400"
+                      }`}
                       required
                     />
+                    {fieldErrors.n8nExternalUrl && (
+                      <p className="mt-1 text-xs text-red-600">{fieldErrors.n8nExternalUrl}</p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Security Key *
                     </label>
                     <Select value={n8nSecurityKeyId} onValueChange={setN8nSecurityKeyId}>
-                      <SelectTrigger className="bg-white border-gray-300 text-gray-900">
+                      <SelectTrigger
+                        className={`bg-white text-gray-900 ${
+                          fieldErrors.n8nSecurityKeyId
+                            ? "border-red-500 focus:border-red-500"
+                            : "border-gray-300"
+                        }`}
+                      >
                         <SelectValue
                           placeholder={securityKeysLoading ? "Loading..." : "Select key"}
                         />
@@ -521,6 +595,9 @@ export const AddAgentModal = ({
                         ))}
                       </SelectContent>
                     </Select>
+                    {fieldErrors.n8nSecurityKeyId && (
+                      <p className="mt-1 text-xs text-red-600">{fieldErrors.n8nSecurityKeyId}</p>
+                    )}
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <label className="flex items-center gap-2 text-sm text-gray-700">
@@ -582,9 +659,16 @@ export const AddAgentModal = ({
                       value={dustWorkspaceSid}
                       onChange={(e) => setDustWorkspaceSid(e.target.value)}
                       placeholder="workspace_sid"
-                      className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-gray-400"
+                      className={`bg-white text-gray-900 placeholder-gray-500 ${
+                        fieldErrors.dustWorkspaceSid
+                          ? "border-red-500 focus:border-red-500"
+                          : "border-gray-300 focus:border-gray-400"
+                      }`}
                       required
                     />
+                    {fieldErrors.dustWorkspaceSid && (
+                      <p className="mt-1 text-xs text-red-600">{fieldErrors.dustWorkspaceSid}</p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -594,16 +678,29 @@ export const AddAgentModal = ({
                       value={dustAgentSid}
                       onChange={(e) => setDustAgentSid(e.target.value)}
                       placeholder="agent_sid"
-                      className="bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-gray-400"
+                      className={`bg-white text-gray-900 placeholder-gray-500 ${
+                        fieldErrors.dustAgentSid
+                          ? "border-red-500 focus:border-red-500"
+                          : "border-gray-300 focus:border-gray-400"
+                      }`}
                       required
                     />
+                    {fieldErrors.dustAgentSid && (
+                      <p className="mt-1 text-xs text-red-600">{fieldErrors.dustAgentSid}</p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Security Key *
                     </label>
                     <Select value={dustSecurityKeyId} onValueChange={setDustSecurityKeyId}>
-                      <SelectTrigger className="bg-white border-gray-300 text-gray-900">
+                      <SelectTrigger
+                        className={`bg-white text-gray-900 ${
+                          fieldErrors.dustSecurityKeyId
+                            ? "border-red-500 focus:border-red-500"
+                            : "border-gray-300"
+                        }`}
+                      >
                         <SelectValue
                           placeholder={securityKeysLoading ? "Loading..." : "Select key"}
                         />
@@ -616,6 +713,9 @@ export const AddAgentModal = ({
                         ))}
                       </SelectContent>
                     </Select>
+                    {fieldErrors.dustSecurityKeyId && (
+                      <p className="mt-1 text-xs text-red-600">{fieldErrors.dustSecurityKeyId}</p>
+                    )}
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <label className="flex items-center gap-2 text-sm text-gray-700">
@@ -741,7 +841,11 @@ export const AddAgentModal = ({
                 >
                   Cancel
                 </Button>
-                <Button type="submit" className="flex-1 bg-gray-900 hover:bg-gray-800 text-white">
+                <Button
+                  type="submit"
+                  className="flex-1 bg-gray-900 hover:bg-gray-800 text-white disabled:opacity-70 disabled:cursor-not-allowed"
+                  disabled={submitting}
+                >
                   {isEditing ? "Save" : "Create Tool"}
                 </Button>
               </div>
