@@ -30,6 +30,7 @@ export const GET = withAuth(async ({ request }) => {
     id: r.id,
     explicitCallName: r.explicitCallName,
     readableName: r.readableName,
+    description: r.description || null,
     toolType: r.toolType,
     tags: r.toolTags.map((tt) => tt.tag),
     createdAt: r.createdAt,
@@ -43,6 +44,7 @@ export const POST = withAuth(async ({ request, user }) => {
   const body = await request.json().catch(() => null) as {
     explicit_call_name?: string;
     readable_name?: string;
+    description?: string;
     tool_type?: "HARD_CODED" | "N8N" | "DUST";
     tag_ids?: string[];
   } | null;
@@ -51,6 +53,7 @@ export const POST = withAuth(async ({ request, user }) => {
   const admin = await isAdmin(user.id);
   const explicitCallName = String(body.explicit_call_name || "").trim();
   const readableName = String(body.readable_name || "").trim();
+  const description = body.description ? String(body.description).trim() : null;
   let toolType = (body.tool_type as any) || "HARD_CODED";
 
   if (!explicitCallName || !readableName) {
@@ -74,9 +77,10 @@ export const POST = withAuth(async ({ request, user }) => {
       data: {
         explicitCallName,
         readableName,
+        description,
         toolType,
         toolTags: tagIds.length ? { createMany: { data: tagIds.map((id) => ({ tagId: id })) } } : undefined,
-      },
+      } as any,
       select: { id: true },
     });
     return NextResponse.json(created, { status: 201 });

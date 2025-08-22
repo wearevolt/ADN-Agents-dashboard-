@@ -15,7 +15,7 @@ export const GET = withAuth(async ({ request }) => {
   const items = await prisma.hardcodedTool.findMany({
     include: {
       registry: {
-        select: { id: true, explicitCallName: true, readableName: true, toolType: true },
+        select: { id: true, explicitCallName: true, readableName: true, description: true, toolType: true },
       },
     },
     orderBy: { id: "desc" },
@@ -25,7 +25,7 @@ export const GET = withAuth(async ({ request }) => {
 
 export const POST = withAuth(async ({ request, user }) => {
   // USER and ADMIN can create hardcoded tool profile for an existing registry id
-  const body = await request.json().catch(() => null) as { id?: string; notes?: string } | null;
+  const body = await request.json().catch(() => null) as { id?: string } | null;
   if (!body?.id) return NextResponse.json({ error: "missing_registry_id" }, { status: 400 });
 
   // Ensure registry exists and is HARD_CODED
@@ -34,7 +34,7 @@ export const POST = withAuth(async ({ request, user }) => {
   if (reg.toolType !== "HARD_CODED") return NextResponse.json({ error: "type_mismatch" }, { status: 400 });
 
   try {
-    const created = await prisma.hardcodedTool.create({ data: { id: reg.id, notes: body.notes || null } });
+    const created = await prisma.hardcodedTool.create({ data: { id: reg.id } });
     return NextResponse.json(created, { status: 201 });
   } catch {
     return NextResponse.json({ error: "create_failed" }, { status: 500 });

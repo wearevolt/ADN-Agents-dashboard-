@@ -75,6 +75,7 @@ model ToolsRegistry {
   id               String   @id @default(cuid())
   explicitCallName String   @unique @map("explicit_call_name")
   readableName     String   @map("readable_name")
+  description      String?  @map("description")
   toolType         ToolType @map("tool_type")
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
@@ -105,7 +106,6 @@ model ToolsRegistryTag {
 model HardcodedTool {
   id       String        @id
   registry ToolsRegistry @relation(fields: [id], references: [id], onDelete: Cascade)
-  notes    String?
 
   @@map("hardcoded_tools")
 }

@@ -2,9 +2,37 @@ import { NextResponse } from "next/server";
 import { withAuth } from "@/lib/auth/withAuth";
 import { prisma } from "@/lib/prisma";
 
-async function isAdmin(userId: string): Promise<boolean> {
+const MAIN_USERINFO_URL = process.env.MAIN_USERINFO_URL;
+const AUTH_DEBUG = String(process.env.AUTH_DEBUG || "").toLowerCase() === "true" || process.env.AUTH_DEBUG === "1";
+
+async function resolveCanonicalUserId(request: Request, fallbackUserId: string): Promise<string> {
+  let canonicalUserId = fallbackUserId;
+  if (!MAIN_USERINFO_URL) return canonicalUserId;
+  try {
+    const cookieHeader = request.headers.get("cookie") || "";
+    const body = JSON.stringify({ query: "query Me { me { id email } }", variables: {} });
+    const upstream = await fetch(MAIN_USERINFO_URL, {
+      method: "POST",
+      headers: { "content-type": "application/json", accept: "application/json", cookie: cookieHeader },
+      body,
+    });
+    if (upstream.ok) {
+      const json = (await upstream.json()) as any;
+      const me = json?.data?.me;
+      if (me?.id) canonicalUserId = String(me.id);
+    } else if (AUTH_DEBUG) {
+      console.log("[auth] tools: upstream me not ok, status:", upstream.status);
+    }
+  } catch (e) {
+    if (AUTH_DEBUG) console.log("[auth] tools: upstream me failed", (e as Error)?.message || e);
+  }
+  return canonicalUserId;
+}
+
+async function isAdmin(request: Request, userId: string): Promise<boolean> {
+  const canonicalUserId = await resolveCanonicalUserId(request, userId);
   const match = await prisma.userRole.findFirst({
-    where: { userId, role: { name: "ADMIN" } },
+    where: { userId: canonicalUserId, role: { name: "ADMIN" } },
     select: { id: true },
   });
   return !!match;
@@ -25,6 +53,9 @@ export const POST = withAuth(async ({ request, user }) => {
 
   const explicitCallName = String(body.explicit_call_name || "").trim();
   const readableName = String(body.readable_name || "").trim();
+  const description = body.profile && typeof body.profile.description === "string"
+    ? String(body.profile.description).trim()
+    : null;
   let toolType = (body.tool_type as any) || "HARD_CODED";
   const profile = (body.profile || {}) as Record<string, any>;
   const tagIds = Array.isArray(body.tag_ids) ? body.tag_ids.map(String) : [];
@@ -33,9 +64,10 @@ export const POST = withAuth(async ({ request, user }) => {
     return NextResponse.json({ error: "missing_fields" }, { status: 400 });
   }
 
-  const admin = await isAdmin(user.id);
-  if (!admin) {
-    toolType = "HARD_CODED";
+  const admin = await isAdmin(request, user.id);
+  // Do not coerce type for non-admins; return a clear error instead
+  if (!admin && toolType !== "HARD_CODED") {
+    return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
   // Basic validations per type
@@ -66,16 +98,17 @@ export const POST = withAuth(async ({ request, user }) => {
         data: {
           explicitCallName,
           readableName,
+          description,
           toolType,
           toolTags: tagIds.length
             ? { createMany: { data: tagIds.map((id) => ({ tagId: id })) } }
             : undefined,
-        },
+        } as any,
         select: { id: true, toolType: true },
       });
 
       if (toolType === "HARD_CODED") {
-        await tx.hardcodedTool.create({ data: { id: reg.id, notes: (profile.notes as string) || null } });
+        await tx.hardcodedTool.create({ data: { id: reg.id } });
       } else if (toolType === "N8N") {
         await tx.n8NTool.create({
           data: {

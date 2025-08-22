@@ -10,11 +10,36 @@ async function isAdmin(userId: string): Promise<boolean> {
   return !!match;
 }
 
-export const GET = withAuth(async ({ user }) => {
-  // Only ADMINs can list security keys
-  if (!(await isAdmin(user.id))) {
-    return NextResponse.json({ error: "forbidden" }, { status: 403 });
+const MAIN_USERINFO_URL = process.env.MAIN_USERINFO_URL;
+
+async function resolveCanonicalUserId(request: Request, userId: string): Promise<string> {
+  if (!MAIN_USERINFO_URL) return userId;
+  try {
+    const cookieHeader = request.headers.get("cookie") || "";
+    const body = JSON.stringify({ query: "query Me { me { id } }", variables: {} });
+    const upstream = await fetch(MAIN_USERINFO_URL, {
+      method: "POST",
+      headers: { "content-type": "application/json", accept: "application/json", cookie: cookieHeader },
+      body,
+    });
+    if (!upstream.ok) return userId;
+    const json = (await upstream.json()) as any;
+    const me = json?.data?.me;
+    return me?.id ? String(me.id) : userId;
+  } catch {
+    return userId;
   }
+}
+
+export const GET = withAuth(async ({ request, user }) => {
+  // Only ADMINs can list security keys. Accept ADMIN either from JWT roles or DB mapping
+  const isAdminByJwt = Array.isArray(user.roles) && user.roles.includes("ADMIN");
+  let allowed = isAdminByJwt;
+  if (!allowed) {
+    const canonicalId = await resolveCanonicalUserId(request, user.id);
+    allowed = await isAdmin(canonicalId);
+  }
+  if (!allowed) return NextResponse.json({ error: "forbidden" }, { status: 403 });
   const keys = await prisma.securityKey.findMany({
     orderBy: { createdAt: "desc" },
     select: { id: true, systemName: true, description: true },

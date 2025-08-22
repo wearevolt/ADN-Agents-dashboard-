@@ -215,20 +215,62 @@ export const AddAgentModal = ({
     setSelectedTagIds(ids);
   }, [editingAgent, availableTags]);
 
-  // Ensure readable name is loaded from server when missing in editing context
+  // Ensure registry info (readable name + tool type) is loaded when editing
   useEffect(() => {
     if (!isOpen || !editingAgent) return;
-    if (editingAgent.displayName) return;
     (async () => {
       try {
         const res = await fetch(`/api/tools/registry/${editingAgent.id}`, { cache: "no-store" });
         if (!res.ok) return;
         const data = (await res.json()) as {
           readableName?: string;
+          description?: string | null;
           toolType?: "HARD_CODED" | "N8N" | "DUST";
+          n8n?: {
+            external_url: string;
+            security_key_id: string;
+            return_direct: boolean;
+            is_isolated: boolean;
+            stream_if_single_tool: boolean;
+            flash_answer_needed: boolean;
+            timeout_seconds: number;
+          } | null;
+          dust?: {
+            dust_workspace_sid: string;
+            dust_agent_sid: string;
+            security_key_id: string;
+            return_direct: boolean;
+            is_isolated: boolean;
+            stream_if_single_tool: boolean;
+            api_timeout_seconds: number;
+            message_events_timeout_seconds: number;
+            conversation_events_timeout_seconds: number;
+          } | null;
         };
         if (data?.readableName) setDisplayName(data.readableName);
+        if (data?.description !== undefined && data?.description !== null)
+          setDescription(data.description);
         if (data?.toolType) setToolType(data.toolType);
+        if (data?.toolType === "N8N" && data?.n8n) {
+          setN8nExternalUrl(data.n8n.external_url || "");
+          setN8nSecurityKeyId(data.n8n.security_key_id || "");
+          setN8nReturnDirect(!!data.n8n.return_direct);
+          setN8nIsIsolated(!!data.n8n.is_isolated);
+          setN8nStreamIfSingle(!!data.n8n.stream_if_single_tool);
+          setN8nFlashAnswerNeeded(!!data.n8n.flash_answer_needed);
+          setN8nTimeoutSeconds(Number(data.n8n.timeout_seconds || 30));
+        }
+        if (data?.toolType === "DUST" && data?.dust) {
+          setDustWorkspaceSid(data.dust.dust_workspace_sid || "");
+          setDustAgentSid(data.dust.dust_agent_sid || "");
+          setDustSecurityKeyId(data.dust.security_key_id || "");
+          setDustReturnDirect(!!data.dust.return_direct);
+          setDustIsIsolated(!!data.dust.is_isolated);
+          setDustStreamIfSingle(!!data.dust.stream_if_single_tool);
+          setDustApiTimeout(Number(data.dust.api_timeout_seconds || 30));
+          setDustMsgEventsTimeout(Number(data.dust.message_events_timeout_seconds || 180));
+          setDustConvEventsTimeout(Number(data.dust.conversation_events_timeout_seconds || 30));
+        }
       } catch {
         // noop
       }
@@ -310,6 +352,7 @@ export const AddAgentModal = ({
             explicit_call_name: explicitName.trim(),
             readable_name: displayName.trim(),
             tag_ids: selectedTagIds,
+            description: description || null,
           }),
         });
         if (regRes.status === 409) {
@@ -363,7 +406,7 @@ export const AddAgentModal = ({
     try {
       const profile =
         toolType === "HARD_CODED"
-          ? { notes: description || undefined }
+          ? {}
           : toolType === "N8N"
             ? {
                 external_url: n8nExternalUrl.trim(),
@@ -373,6 +416,7 @@ export const AddAgentModal = ({
                 stream_if_single_tool: n8nStreamIfSingle,
                 flash_answer_needed: n8nFlashAnswerNeeded,
                 timeout_seconds: n8nTimeoutSeconds,
+                description: description || undefined,
               }
             : {
                 dust_workspace_sid: dustWorkspaceSid.trim(),
@@ -384,6 +428,7 @@ export const AddAgentModal = ({
                 api_timeout_seconds: dustApiTimeout,
                 message_events_timeout_seconds: dustMsgEventsTimeout,
                 conversation_events_timeout_seconds: dustConvEventsTimeout,
+                description: description || undefined,
               };
 
       const res = await fetch("/api/tools", {

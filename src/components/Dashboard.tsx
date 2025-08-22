@@ -99,18 +99,13 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
         ]);
         const registry = regRes.ok ? await regRes.json() : [];
         const hardcoded = hcRes.ok ? await hcRes.json() : [];
-        const notesById = new Map<string, string | undefined>();
-        for (const h of hardcoded) {
-          notesById.set(h.id, h?.notes || h?.registry?.notes || undefined);
-        }
         const mapped: Agent[] = (registry as any[]).map((r) => ({
           id: r.id,
           name: `@${r.explicitCallName}`,
           displayName: r.readableName,
           type: "personal",
           status: "active",
-          description:
-            r.toolType === "HARD_CODED" ? notesById.get(r.id) || "" : `${r.toolType} tool`,
+          description: r.description || `${r.toolType} tool`,
           isCustom: true,
           tags: Array.isArray(r.tags) ? (r.tags as any[]).map((t: any) => t.name) : [],
         }));
