@@ -77,6 +77,7 @@ model ToolsRegistry {
   readableName     String   @map("readable_name")
   description      String?  @map("description")
   toolType         ToolType @map("tool_type")
+  isPrivate        Boolean  @default(false) @map("is_private")
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
 

@@ -16,10 +16,11 @@ export const GET = withAuth(async ({ request }) => {
 export const PATCH = withAuth(async ({ request }) => {
   const id = request.url.split("/hardcoded/")[1]?.split("/")[0];
   if (!id) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  const body = await request.json().catch(() => null) as { notes?: string } | null;
+  const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
   if (!body) return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   try {
-    const updated = await prisma.hardcodedTool.update({ where: { id }, data: { notes: body.notes ?? null } });
+    // No updatable fields defined for HardcodedTool profile in current schema
+    const updated = await prisma.hardcodedTool.update({ where: { id }, data: {} });
     return NextResponse.json(updated);
   } catch {
     return NextResponse.json({ error: "update_failed" }, { status: 500 });

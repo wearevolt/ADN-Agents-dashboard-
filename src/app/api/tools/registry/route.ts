@@ -32,6 +32,7 @@ export const GET = withAuth(async ({ request }) => {
     readableName: r.readableName,
     description: r.description || null,
     toolType: r.toolType,
+    is_private: r.isPrivate,
     tags: r.toolTags.map((tt) => tt.tag),
     createdAt: r.createdAt,
     updatedAt: r.updatedAt,
@@ -47,6 +48,7 @@ export const POST = withAuth(async ({ request, user }) => {
     description?: string;
     tool_type?: "HARD_CODED" | "N8N" | "DUST";
     tag_ids?: string[];
+    is_private?: boolean;
   } | null;
   if (!body) return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
 
@@ -79,6 +81,7 @@ export const POST = withAuth(async ({ request, user }) => {
         readableName,
         description,
         toolType,
+        isPrivate: !!body.is_private,
         toolTags: tagIds.length ? { createMany: { data: tagIds.map((id) => ({ tagId: id })) } } : undefined,
       } as any,
       select: { id: true },

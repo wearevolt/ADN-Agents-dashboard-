@@ -171,8 +171,18 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
     onOpenChat();
   };
 
-  const handleCardClick = () => {
-    onOpenChat();
+  // Open main application with assistant params for selected agent
+  const handleCardClick = (agent: Agent) => {
+    const baseUrl = (process.env.MAIN_APP_URL || "").replace(/\/$/, "");
+    if (!baseUrl) {
+      onOpenChat();
+      return;
+    }
+    const explicitName = agent.name?.startsWith("@") ? agent.name.slice(1) : agent.name;
+    const targetUrl = `${baseUrl}/?assistant=1&explicit_call_name=${encodeURIComponent(
+      explicitName || ""
+    )}`;
+    window.open(targetUrl, "_blank", "noopener,noreferrer");
   };
 
   const handleAddAgent = (newAgent: {
@@ -708,7 +718,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
             <Card
               key={agent.id}
               className="group bg-white border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer relative shadow-sm h-[212px] flex flex-col"
-              onClick={handleCardClick}
+              onClick={() => handleCardClick(agent)}
             >
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
@@ -766,7 +776,7 @@ const Dashboard = ({ onOpenChat, user, onLogout }: DashboardProps) => {
                       className="text-sm font-medium flex items-center text-blue-600 hover:text-blue-700"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleCardClick();
+                        handleCardClick(agent);
                       }}
                     >
                       Open

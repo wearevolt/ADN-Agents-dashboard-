@@ -47,6 +47,7 @@ export const POST = withAuth(async ({ request, user }) => {
       tool_type?: "HARD_CODED" | "N8N" | "DUST";
       tag_ids?: string[];
       profile?: Record<string, unknown>;
+      is_private?: boolean;
     }
     | null;
   if (!body) return NextResponse.json({ error: "invalid_json" }, { status: 400 });
@@ -100,6 +101,7 @@ export const POST = withAuth(async ({ request, user }) => {
           readableName,
           description,
           toolType,
+          isPrivate: !!body.is_private,
           toolTags: tagIds.length
             ? { createMany: { data: tagIds.map((id) => ({ tagId: id })) } }
             : undefined,

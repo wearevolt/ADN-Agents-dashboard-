@@ -88,6 +88,7 @@ export const AddAgentModal = ({
   const [explicitName, setExplicitName] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [description, setDescription] = useState("");
+  const [isPrivate, setIsPrivate] = useState<boolean>(true);
 
   // N8N specific
   const [n8nExternalUrl, setN8nExternalUrl] = useState("");
@@ -149,6 +150,8 @@ export const AddAgentModal = ({
           webhookUrl: editingAgent.webhookUrl || "https://link_id1234.webhook.com",
           description: editingAgent.description || "",
         });
+        // optimistic default until registry loads
+        setIsPrivate(true);
       } else {
         setSelectedTags([]);
         setSelectedTagIds([]);
@@ -156,6 +159,8 @@ export const AddAgentModal = ({
         setExplicitName("");
         setDisplayName("");
         setDescription("");
+        // default private for new tools
+        setIsPrivate(true);
         // Reset type-specific fields
         setN8nExternalUrl("");
         setN8nSecurityKeyId("");
@@ -226,6 +231,7 @@ export const AddAgentModal = ({
           readableName?: string;
           description?: string | null;
           toolType?: "HARD_CODED" | "N8N" | "DUST";
+          is_private?: boolean;
           n8n?: {
             external_url: string;
             security_key_id: string;
@@ -251,6 +257,7 @@ export const AddAgentModal = ({
         if (data?.description !== undefined && data?.description !== null)
           setDescription(data.description);
         if (data?.toolType) setToolType(data.toolType);
+        if (typeof data?.is_private === "boolean") setIsPrivate(!!data.is_private);
         if (data?.toolType === "N8N" && data?.n8n) {
           setN8nExternalUrl(data.n8n.external_url || "");
           setN8nSecurityKeyId(data.n8n.security_key_id || "");
@@ -353,6 +360,7 @@ export const AddAgentModal = ({
             readable_name: displayName.trim(),
             tag_ids: selectedTagIds,
             description: description || null,
+            is_private: isPrivate,
           }),
         });
         if (regRes.status === 409) {
@@ -439,6 +447,7 @@ export const AddAgentModal = ({
           readable_name: displayName.trim(),
           tool_type: toolType,
           tag_ids: selectedTagIds,
+          is_private: isPrivate,
           profile,
         }),
       });
@@ -561,6 +570,26 @@ export const AddAgentModal = ({
                 {fieldErrors.toolType && (
                   <p className="mt-1 text-xs text-red-600">{fieldErrors.toolType}</p>
                 )}
+              </div>
+
+              {/* Private Agent Toggle */}
+              <div className="flex items-center">
+                <label className="block text-sm font-medium text-gray-700 mb-1 mr-2">Private</label>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isPrivate}
+                    onChange={(e) => setIsPrivate(e.target.checked)}
+                    className="sr-only"
+                  />
+                  <div
+                    className={`w-11 h-6 rounded-full transition-colors flex items-center ${isPrivate ? "bg-blue-600" : "bg-gray-200"}`}
+                  >
+                    <div
+                      className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${isPrivate ? "translate-x-5" : "translate-x-0.5"}`}
+                    ></div>
+                  </div>
+                </label>
               </div>
 
               {/* Explicit name */}
@@ -857,6 +886,26 @@ export const AddAgentModal = ({
                   rows={3}
                   className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-gray-900 placeholder-gray-500"
                 />
+              </div>
+
+              {/* Private Agent Toggle */}
+              <div className="flex items-center">
+                <label className="block text-sm font-medium text-gray-700 mb-1 mr-2">Private</label>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isPrivate}
+                    onChange={(e) => setIsPrivate(e.target.checked)}
+                    className="sr-only"
+                  />
+                  <div
+                    className={`w-11 h-6 rounded-full transition-colors flex items-center ${isPrivate ? "bg-blue-600" : "bg-gray-200"}`}
+                  >
+                    <div
+                      className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${isPrivate ? "translate-x-5" : "translate-x-0.5"}`}
+                    ></div>
+                  </div>
+                </label>
               </div>
 
               {/* Tags */}

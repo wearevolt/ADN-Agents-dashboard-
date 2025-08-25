@@ -78,6 +78,7 @@ export const GET = withAuth(async ({ request }) => {
     readableName: item.readableName,
     description: item.description || null,
     toolType: item.toolType,
+    is_private: item.isPrivate,
     tags: item.toolTags.map((tt) => tt.tag),
     n8n: item.n8n
       ? {
@@ -116,6 +117,7 @@ export const PATCH = withAuth(async ({ request, user }) => {
     readable_name?: string;
     description?: string | null;
     tag_ids?: string[];
+    is_private?: boolean;
     // tool_type changes are not allowed in MVP
   } | null;
   if (!body) return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
@@ -141,6 +143,7 @@ export const PATCH = withAuth(async ({ request, user }) => {
           explicitCallName: body.explicit_call_name?.trim() || undefined,
           readableName: body.readable_name?.trim() || undefined,
           description: body.description !== undefined ? (body.description?.trim?.() || null) : undefined,
+          isPrivate: body.is_private === undefined ? undefined : !!body.is_private,
         },
         select: { id: true },
       });

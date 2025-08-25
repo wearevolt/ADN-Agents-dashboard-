@@ -2,16 +2,16 @@ import { proxyDelete, proxyGet } from "../../../_utils";
 
 export async function GET(
   _req: Request,
-  context: { params: { agentId: string; sessionId: string } }
+  { params }: any
 ) {
-  const { agentId, sessionId } = context.params;
+  const { agentId, sessionId } = params;
   return proxyGet(`/sessions/${encodeURIComponent(agentId)}/${encodeURIComponent(sessionId)}`);
 }
 
 export async function DELETE(
   _req: Request,
-  context: { params: { agentId: string; sessionId: string } }
+  { params }: any
 ) {
-  const { agentId, sessionId } = context.params;
+  const { agentId, sessionId } = params;
   return proxyDelete(`/sessions/${encodeURIComponent(agentId)}/${encodeURIComponent(sessionId)}`);
 }
